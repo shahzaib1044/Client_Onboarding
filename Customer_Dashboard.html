@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Customer Dashboard</title>
+<style>
+  /* Basic reset and layout */
+  body {
+    margin: 0;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(to bottom right, #c3dafe 5%, #f0f4ff 50%, #c3dafe 90%);
+    min-height: 100vh;
+  }
+
+  header {
+    background: rgba(255 255 255 / 0.9);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid #ddd;
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  header .branding {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  header .branding .icon {
+    background-color: #3b82f6;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-weight: bold;
+    font-size: 22px;
+  }
+
+  header .user-info {
+    text-align: right;
+    margin-right: 1rem;
+  }
+
+  header .user-info p {
+    margin: 0;
+    font-size: 0.9rem;
+  }
+
+  header button {
+    background: none;
+    border: 1px solid #3b82f6;
+    color: #3b82f6;
+    border-radius: 6px;
+    padding: 0.4rem 1rem;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  header button:hover {
+    background: #3b82f6;
+    color: white;
+  }
+
+  main {
+    max-width: 900px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+  }
+
+  h2 {
+    font-size: 2rem;
+    margin-bottom: 0.3rem;
+  }
+
+  p.description {
+    color: #555;
+    margin-top: 0;
+    margin-bottom: 2rem;
+  }
+
+  .card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 12px rgb(0 0 0 / 0.1);
+    margin-bottom: 1.5rem;
+  }
+
+  .card.dashed {
+    border: 2px dashed #3b82f6;
+    text-align: center;
+  }
+
+  .card .icon-large {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: #3b82f6;
+  }
+
+  .btn-primary {
+    background-color: #3b82f6;
+    color: white;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .btn-primary:hover {
+    background-color: #2563eb;
+  }
+
+  .grid-3 {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  @media (min-width: 700px) {
+    .grid-3 {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  .status-badge {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 9999px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .status-approved {
+    background-color: #d1fae5;
+    color: #065f46;
+  }
+
+  .status-pending {
+    background-color: #fef3c7;
+    color: #92400e;
+  }
+
+  .status-rejected {
+    background-color: #fee2e2;
+    color: #991b1b;
+  }
+
+  .small-text {
+    font-size: 0.85rem;
+    color: #666;
+    margin-top: 0.5rem;
+  }
+
+  .info-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  @media (min-width: 600px) {
+    .info-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .info-label {
+    font-size: 0.9rem;
+    color: #555;
+    font-weight: 600;
+  }
+
+  .info-value {
+    font-weight: 600;
+  }
+
+  .rejection-reason {
+    margin-top: 1rem;
+    padding: 1rem;
+    background-color: #fee2e2;
+    border: 1px solid #fca5a5;
+    border-radius: 8px;
+    color: #991b1b;
+  }
+
+  .documents-list > div {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 0.75rem 1rem;
+    margin-bottom: 0.7rem;
+    cursor: pointer;
+  }
+
+  .documents-list > div:hover {
+    background-color: #f9fafb;
+  }
+
+  .documents-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .documents-icon {
+    font-size: 1.5rem;
+    color: #3b82f6;
+  }
+
+  .documents-meta {
+    font-size: 0.85rem;
+    color: #666;
+  }
+
+  .btn-outline {
+    border: 1px solid #3b82f6;
+    background: none;
+    color: #3b82f6;
+    padding: 0.3rem 0.8rem;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .btn-outline:hover {
+    background: #3b82f6;
+    color: white;
+  }
+
+  /* Loading spinner */
+  .spinner {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #3b82f6;
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    animation: spin 1s linear infinite;
+    margin: 5rem auto;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg);}
+    100% { transform: rotate(360deg);}
+  }
+
+</style>
+</head>
+<body>
+
+<header>
+  <div class="branding">
+    <div class="icon">📄</div>
+    <div>
+      <h1>Client Onboarding</h1>
+      <p>Customer Portal</p>
+    </div>
+  </div>
+  <div class="user-info">
+    <p id="userEmail">user@example.com</p>
+    <p>Customer Account</p>
+  </div>
+  <button id="logoutBtn">Logout</button>
+</header>
+
+<main>
+  <div id="welcomeSection">
+    <h2>Welcome back!</h2>
+    <p class="description" id="welcomeMessage"></p>
+  </div>
+
+  <div id="noApplication" class="card dashed" style="display:none;">
+    <div class="icon-large">👤</div>
+    <h3>No Application Yet</h3>
+    <p>Start your journey with us by completing the application form. It only takes a few minutes.</p>
+    <button id="startApplicationBtn" class="btn-primary">📄 Start Application</button>
+  </div>
+
+  <div id="applicationSection" style="display:none;">
+    <div class="grid-3">
+      <div class="card">
+        <h4>Application Status</h4>
+        <div id="statusBadge" class="status-badge"></div>
+        <small id="decisionDate" class="small-text"></small>
+      </div>
+      <div class="card">
+        <h4>Account Type</h4>
+        <div id="accountType" style="font-weight:bold; font-size:1.5rem; margin-top: 0.5rem;"></div>
+        <p class="small-text" id="initialDeposit"></p>
+      </div>
+      <div class="card">
+        <h4>Documents</h4>
+        <div id="documentCount" style="font-weight:bold; font-size:1.5rem; margin-top: 0.5rem;">0</div>
+        <p class="small-text">Files uploaded</p>
+      </div>
+    </div>
+
+    <div class="card" id="riskCard" style="display:none; margin-top: 1.5rem;">
+      <h4>Risk Assessment</h4>
+      <p>Your application risk evaluation</p>
+      <div id="riskScore" style="font-size: 2rem; font-weight: 700; text-align:center; margin: 1rem 0;"></div>
+      <p id="riskLevel" style="text-align:center; font-weight:600;"></p>
+    </div>
+
+    <div class="card" style="margin-top:1.5rem;">
+      <h4>Application Details</h4>
+      <div class="info-grid">
+        <div>
+          <div class="info-label">Full Name</div>
+          <div class="info-value" id="fullName"></div>
+        </div>
+        <div>
+          <div class="info-label">Date of Birth</div>
+          <div class="info-value" id="dob"></div>
+        </div>
+        <div>
+          <div class="info-label">Phone</div>
+          <div class="info-value" id="phone"></div>
+        </div>
+        <div>
+          <div class="info-label">Employment Status</div>
+          <div class="info-value" id="employmentStatus"></div>
+        </div>
+        <div style="grid-column: span 2;">
+          <div class="info-label">Address</div>
+          <div class="info-value" id="address"></div>
+        </div>
+      </div>
+      <div id="rejectionReason" class="rejection-reason" style="display:none;">
+        <h5>Rejection Reason</h5>
+        <p id="rejectionText"></p>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:1.5rem;">
+      <h4>Uploaded Documents</h4>
+      <p>Your submitted files</p>
+      <div id="documentsList" class="documents-list"></div>
+      <p id="noDocsMessage" style="text-align:center; color:#666; margin-top: 1rem; display:none;">No documents uploaded yet</p>
+    </div>
+  </div>
+
+  <div id="loading" style="display:none;">
+    <div class="spinner"></div>
+    <p style="text-align:center; color:#333;">Loading your dashboard...</p>
+  </div>
+</main>
+
+<script>
+  const userEmailEl = document.getElementById('userEmail');
+  const logoutBtn = document.getElementById('logoutBtn');
+  const welcomeMessageEl = document.getElementById('welcomeMessage');
+  const noApplicationEl = document.getElementById('noApplication');
+  const applicationSectionEl = document.getElementById('applicationSection');
+  const startApplicationBtn = document.getElementById('startApplicationBtn');
+  const loadingEl = document.getElementById('loading');
+
+  const statusBadgeEl = document.getElementById('statusBadge');
+  const decisionDateEl = document.getElementById('decisionDate');
+  const accountTypeEl = document.getElementById('accountType');
+  const initialDepositEl = document.getElementById('initialDeposit');
+  const documentCountEl = document.getElementById('documentCount');
+  const riskCardEl = document.getElementById('riskCard');
+  const riskScoreEl = document.getElementById('riskScore');
+  const riskLevelEl = document.getElementById('riskLevel');
+  const fullNameEl = document.getElementById('fullName');
+  const dobEl = document.getElementById('dob');
+  const phoneEl = document.getElementById('phone');
+  const employmentStatusEl = document.getElementById('employmentStatus');
+  const addressEl = document.getElementById('address');
+  const rejectionReasonEl = document.getElementById('rejectionReason');
+  const rejectionTextEl = document.getElementById('rejectionText');
+  const documentsListEl = document.getElementById('documentsList');
+  const noDocsMessageEl = document.getElementById('noDocsMessage');
+
+  // Helper for date formatting
+  function formatDate(dateStr) {
+    const options = { year: 'numeric', month: 'short', day: 'numeric' };
+    return new Date(dateStr).toLocaleDateString(undefined, options);
+  }
+
+  // Set status badge styles and text
+  function setStatusBadge(status) {
+    const s = status.toUpperCase();
+    statusBadgeEl.textContent = s;
+    statusBadgeEl.className = 'status-badge';
+
+    if (s === 'APPROVED') {
+      statusBadgeEl.classList.add('status-approved');
+    } else if (s === 'PENDING') {
+      statusBadgeEl.classList.add('status-pending');
+    } else if (s === 'REJECTED') {
+      statusBadgeEl.classList.add('status-rejected');
+    }
+  }
+
+  // Simulated API call helpers (replace these with real API calls)
+  async function fetchCustomer() {
+    // Simulate fetch delay
+    return new Promise(resolve => {
+      setTimeout(() => {
+        // Fake customer data - you can change this to simulate no application
+        resolve({
+          first_name: "Jane",
+          last_name: "Doe",
+          email: "jane.doe@example.com",
+          date_of_birth: "1990-04-15",
+          phone: "+1234567890",
+          employment_status: "FULL_TIME",
+          address_line1: "123 Elm Street",
+          city: "Springfield",
+          postal_code: "12345",
+          country: "USA",
+          account_type: "CUSTOMER",
+          initial_deposit: "10000",
+          status: "APPROVED",  // Try PENDING or REJECTED to test
+          decision_date: "2023-09-15T00:00:00Z",
+          rejection_reason: "" // Fill reason if rejected
+        });
+      }, 1000);
+    });
+  }
+
+  async function fetchDocuments() {
+    return new Promise(resolve => {
+      setTimeout(() => {
+        resolve([
+          { id: 1, file_name: "passport.pdf", file_size: 204800, uploaded_at: "2023-08-01T12:34:56Z" },
+          { id: 2, file_name: "bank_statement.pdf", file_size: 102400, uploaded_at: "2023-08-05T15:12:00Z" }
+        ]);
+      }, 1200);
+    });
+  }
+
+  async function fetchRiskScore() {
+    return new Promise(resolve => {
+      setTimeout(() => {
+        resolve({ score: 75, risk_level: "Moderate" });
+      }, 800);
+    });
+  }
+
+  async function logout() {
+    alert('Logging out...'); // Replace with actual logout logic
+    window.location.href = '/login.html'; // Redirect to login
+  }
+
+  logoutBtn.addEventListener('click', logout);
+
+  async function loadDashboard() {
+    loadingEl.style.display = 'block';
+    noApplicationEl.style.display = 'none';
+    applicationSectionEl.style.display = 'none';
+
+    try {
+      const [customer, documents, riskScore] = await Promise.all([
+        fetchCustomer(),
+        fetchDocuments(),
+        fetchRiskScore()
+      ]);
+
+      userEmailEl.textContent = customer.email || "user@example.com";
+
+      const hasApplication = !!customer;
+
+      if (!hasApplication) {
+        welcomeMessageEl.textContent = "Get started by submitting your application for banking services.";
+        noApplicationEl.style.display = 'block';
+      } else {
+        welcomeMessageEl.textContent = "Track your application status and manage your documents below.";
+
+        // Show application section and fill data
+        applicationSectionEl.style.display = 'block';
+
+        setStatusBadge(customer.status);
+
+        if (customer.decision_date) {
+          decisionDateEl.textContent = `Decided on ${formatDate(customer.decision_date)}`;
+          decisionDateEl.style.display = 'block';
+        } else {
+          decisionDateEl.style.display = 'none';
+        }
+
+        accountTypeEl.textContent = customer.account_type;
+        initialDepositEl.textContent = `Initial Deposit: $${Number(customer.initial_deposit).toLocaleString()}`;
+
+        documentCountEl.textContent = documents.length || 0;
+
+        if (riskScore) {
+          riskCardEl.style.display = 'block';
+          riskScoreEl.textContent = riskScore.score;
+          riskLevelEl.textContent = riskScore.risk_level;
+        } else {
+          riskCardEl.style.display = 'none';
+        }
+
+        fullNameEl.textContent = customer.first_name + " " + customer.last_name;
+        dobEl.textContent = customer.date_of_birth;
+        phoneEl.textContent = customer.phone;
+        employmentStatusEl.textContent = customer.employment_status.replace('_', ' ');
+        addressEl.textContent = `${customer.address_line1}, ${customer.city}, ${customer.postal_code}, ${customer.country}`;
+
+        if (customer.rejection_reason) {
+          rejectionReasonEl.style.display = 'block';
+          rejectionTextEl.textContent = customer.rejection_reason;
+        } else {
+          rejectionReasonEl.style.display = 'none';
+        }
+
+        // Documents list
+        if (documents.length === 0) {
+          noDocsMessageEl.style.display = 'block';
+          documentsListEl.innerHTML = '';
+        } else {
+          noDocsMessageEl.style.display = 'none';
+          documentsListEl.innerHTML = '';
+          documents.forEach(doc => {
+            const docDiv = document.createElement('div');
+
+            const infoDiv = document.createElement('div');
+            infoDiv.className = 'documents-info';
+
+            const iconSpan = document.createElement('span');
+            iconSpan.className = 'documents-icon';
+            iconSpan.textContent = '📄';
+
+            const metaDiv = document.createElement('div');
+
+            const nameP = document.createElement('p');
+            nameP.textContent = doc.file_name;
+            nameP.style.fontWeight = '600';
+            const sizeDateP = document.createElement('p');
+            sizeDateP.className = 'documents-meta';
+            sizeDateP.textContent = `${(doc.file_size / 1024).toFixed(2)} KB • Uploaded ${formatDate(doc.uploaded_at)}`;
+
+            metaDiv.appendChild(nameP);
+            metaDiv.appendChild(sizeDateP);
+
+            infoDiv.appendChild(iconSpan);
+            infoDiv.appendChild(metaDiv);
+
+            const downloadBtn = document.createElement('button');
+            downloadBtn.className = 'btn-outline';
+            downloadBtn.textContent = 'Download';
+            downloadBtn.onclick = () => {
+              // Open document download in new tab
+              window.open(`/api/customers/me/documents/${doc.id}`, '_blank');
+            };
+
+            docDiv.appendChild(infoDiv);
+            docDiv.appendChild(downloadBtn);
+
+            documentsListEl.appendChild(docDiv);
+          });
+        }
+      }
+    } catch (error) {
+      alert("Error loading dashboard data.");
+      console.error(error);
+    } finally {
+      loadingEl.style.display = 'none';
+    }
+  }
+
+  startApplicationBtn.onclick = () => {
+    alert('Redirecting to application page...'); 
+    // Replace with your actual navigation
+    window.location.href = '/customer/apply.html';
+  };
+
+  // On load
+  loadDashboard();
+
+</script>
+
+</body>
+</html>
