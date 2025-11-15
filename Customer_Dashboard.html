@@ -4,6 +4,11 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Customer Dashboard</title>
+<!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
 <style>
   /* Basic reset and layout */
   body {
@@ -256,25 +261,131 @@
     0% { transform: rotate(0deg);}
     100% { transform: rotate(360deg);}
   }
+ .branding-icon {
+      font-size: 40px;
+      padding-right: 10px;
+    }
+      /* Small custom polish */
+  #applicationSection .card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
+    transition: transform .15s ease, box-shadow .15s ease;
+  }
+  #applicationSection .card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 14px 30px rgba(15, 23, 42, 0.08);
+  }
+
+  .status-badge {
+    display:inline-block;
+    padding: .35rem .9rem;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: .83rem;
+  }
+
+  .risk-score {
+    font-size: 2.2rem;
+    font-weight: 800;
+    letter-spacing: .5px;
+  }
+
+  .risk-low { color: #0f5132; background: rgba(16, 185, 129, .08); padding:.45rem .8rem; border-radius:8px; }
+  .risk-med { color: #664d03; background: rgba(253, 230, 138, .12); padding:.45rem .8rem; border-radius:8px; }
+  .risk-high{ color: #6b0b0b; background: rgba(255, 205, 210, .12); padding:.45rem .8rem; border-radius:8px; }
+
+  .info-label { font-size:.85rem; font-weight:600; color:#6b7280; }
+  .info-value { font-size:1.05rem; color:#111827; margin-top:.18rem; }
+
+  .documents-list .doc-item { padding:.55rem .75rem; border-radius:8px; background: #fbfdff; border:1px solid rgba(15,23,42,.03); margin-bottom:.5rem; }
+  .small-muted { color:#6b7280; font-size:.9rem; }
 
 </style>
 </head>
 <body>
+<!-- ================= HEADER / NAVBAR ================= -->
+<nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm px-4">
+  <div class="container-fluid">
 
-<header>
-  <div class="branding">
-    <div class="icon">📄</div>
-    <div>
-      <h1>Client Onboarding</h1>
-      <p>Customer Portal</p>
+    <!-- Branding -->
+    <a class="navbar-brand d-flex align-items-center" href="#">
+      <span class="branding-icon">📄</span>
+      <div>
+        <h5 class="m-0 fw-bold">Client Onboarding</h5>
+        <small class="text-muted">Customer Portal</small>
+      </div>
+    </a>
+
+    <!-- Hamburger (Mobile) -->
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <!-- Navbar Items -->
+    <div class="collapse navbar-collapse" id="mainNavbar">
+      <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+
+        <!-- Active page gets "active" class -->
+        <li class="nav-item">
+          <a class="nav-link active" href="Customer_Dashboard.html">Dashboard</a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link" href="Profile.html">Profile</a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link" href="#">Documents</a>
+        </li>
+
+        <li class="nav-item d-lg-none">
+          <!-- Only shows on mobile -->
+          <a class="nav-link text-danger" href="#" id="logoutBtnMobile">Logout</a>
+        </li>
+
+      </ul>
+
+      <!-- User information (Only visible on large screens) -->
+      <div class="d-none d-lg-block text-end me-3">
+        <p class="m-0 fw-semibold" id="userEmail">user@example.com</p>
+        <small class="text-muted">Customer Account</small>
+      </div>
+
+      <!-- Logout button (desktop only) -->
+      <button id="logoutBtn" class="btn btn-outline-danger d-none d-lg-block">
+        Logout
+      </button>
+
     </div>
   </div>
-  <div class="user-info">
-    <p id="userEmail">user@example.com</p>
-    <p>Customer Account</p>
-  </div>
-  <button id="logoutBtn">Logout</button>
-</header>
+</nav>
+
+<nav aria-label="breadcrumb" class="bg-white px-4 py-2 shadow-sm">
+  <ol class="breadcrumb m-0">
+
+    <!-- Dashboard (active - no link) -->
+    <li class="breadcrumb-item active" aria-current="page">
+      Dashboard
+    </li>
+
+    <!-- Profile -->
+    <li class="breadcrumb-item">
+      <a href="register1.html">Profile</a>
+    </li>
+
+    <!-- Documents -->
+    <li class="breadcrumb-item">
+      <a href="documents.html">Documents</a>
+    </li>
+
+  </ol>
+</nav>
+
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
 
 <main>
   <div id="welcomeSection">
@@ -289,69 +400,129 @@
     <button id="startApplicationBtn" class="btn-primary">📄 Start Application</button>
   </div>
 
-  <div id="applicationSection" style="display:none;">
-    <div class="grid-3">
-      <div class="card">
-        <h4>Application Status</h4>
-        <div id="statusBadge" class="status-badge"></div>
-        <small id="decisionDate" class="small-text"></small>
-      </div>
-      <div class="card">
-        <h4>Account Type</h4>
-        <div id="accountType" style="font-weight:bold; font-size:1.5rem; margin-top: 0.5rem;"></div>
-        <p class="small-text" id="initialDeposit"></p>
-      </div>
-      <div class="card">
-        <h4>Documents</h4>
-        <div id="documentCount" style="font-weight:bold; font-size:1.5rem; margin-top: 0.5rem;">0</div>
-        <p class="small-text">Files uploaded</p>
+ <!-- APPLICATION SECTION (Bootstrap) -->
+<div id="applicationSection" class="container my-4" style="display:none;">
+  <!-- Top summary cards -->
+  <div class="row g-3">
+    <div class="col-12 col-md-4">
+      <div class="card p-3 h-100">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+            <h6 class="mb-1">Application Status</h6>
+            <div id="statusBadge" class="status-badge bg-warning text-dark small">DRAFT</div>
+            <div id="decisionDate" class="small-muted mt-2"></div>
+          </div>
+          <div class="align-self-center">
+            <!-- optional icon -->
+            <svg xmlns="http://www.w3.org/2000/svg" width="34" height="34" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="text-muted">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.2" d="M12 8v4l3 3"></path>
+              <circle cx="12" cy="12" r="9" stroke-width="1.2"></circle>
+            </svg>
+          </div>
+        </div>
       </div>
     </div>
 
-    <div class="card" id="riskCard" style="display:none; margin-top: 1.5rem;">
-      <h4>Risk Assessment</h4>
-      <p>Your application risk evaluation</p>
-      <div id="riskScore" style="font-size: 2rem; font-weight: 700; text-align:center; margin: 1rem 0;"></div>
-      <p id="riskLevel" style="text-align:center; font-weight:600;"></p>
-    </div>
-
-    <div class="card" style="margin-top:1.5rem;">
-      <h4>Application Details</h4>
-      <div class="info-grid">
-        <div>
-          <div class="info-label">Full Name</div>
-          <div class="info-value" id="fullName"></div>
-        </div>
-        <div>
-          <div class="info-label">Date of Birth</div>
-          <div class="info-value" id="dob"></div>
-        </div>
-        <div>
-          <div class="info-label">Phone</div>
-          <div class="info-value" id="phone"></div>
-        </div>
-        <div>
-          <div class="info-label">Employment Status</div>
-          <div class="info-value" id="employmentStatus"></div>
-        </div>
-        <div style="grid-column: span 2;">
-          <div class="info-label">Address</div>
-          <div class="info-value" id="address"></div>
-        </div>
-      </div>
-      <div id="rejectionReason" class="rejection-reason" style="display:none;">
-        <h5>Rejection Reason</h5>
-        <p id="rejectionText"></p>
+    <div class="col-12 col-md-4">
+      <div class="card p-3 h-100">
+        <h6 class="mb-1">Account Type</h6>
+        <div id="accountType" class="h2 fw-bold mb-1">BASIC</div>
+        <div id="initialDeposit" class="small-muted">Initial Deposit: $2</div>
       </div>
     </div>
 
-    <div class="card" style="margin-top:1.5rem;">
-      <h4>Uploaded Documents</h4>
-      <p>Your submitted files</p>
-      <div id="documentsList" class="documents-list"></div>
-      <p id="noDocsMessage" style="text-align:center; color:#666; margin-top: 1rem; display:none;">No documents uploaded yet</p>
+    <div class="col-12 col-md-4">
+      <div class="card p-3 h-100">
+        <h6 class="mb-1">Documents</h6>
+        <div id="documentCount" class="h2 fw-bold mb-1">0</div>
+        <div class="small-muted">Files uploaded</div>
+      </div>
     </div>
   </div>
+
+  <!-- Risk Assessment -->
+  <div class="row g-3 mt-3">
+    <div class="col-12">
+      <div id="riskCard" class="card p-4" style="display:none;">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <h6 class="mb-0">Risk Assessment</h6>
+          <small class="small-muted">Your application risk evaluation</small>
+        </div>
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+          <div class="text-center w-100">
+            <div id="riskScore" class="risk-score">40</div>
+            <div id="riskLevel" class="mt-1 fw-semibold">MEDIUM</div>
+          </div>
+          <div class="text-center text-muted small">Consider updating supporting documents to lower risk.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Application Details -->
+  <div class="row g-3 mt-3">
+    <div class="col-12">
+      <div class="card p-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h6 class="mb-0">Application Details</h6>
+        </div>
+
+        <div class="row g-3">
+          <div class="col-12 col-md-6">
+            <div class="info-label">Full Name</div>
+            <div id="fullName" class="info-value">blue epic</div>
+          </div>
+
+          <div class="col-12 col-md-6">
+            <div class="info-label">Date of Birth</div>
+            <div id="dob" class="info-value">Feb 22, 2000</div>
+          </div>
+
+          <div class="col-12 col-md-6">
+            <div class="info-label">Phone</div>
+            <div id="phone" class="info-value">+358 4499110</div>
+          </div>
+
+          <div class="col-12 col-md-6">
+            <div class="info-label">Employment Status</div>
+            <div id="employmentStatus" class="info-value">UNEMPLOYED</div>
+          </div>
+
+          <div class="col-12">
+            <div class="info-label">Address</div>
+            <div id="address" class="info-value">ABC, Test, 89002, PK</div>
+          </div>
+        </div>
+
+        <div id="rejectionReason" class="mt-3 p-3 rounded" style="display:none; background:#fff7f7; border:1px solid rgba(195,38,38,0.06);">
+          <h6 class="mb-1">Rejection Reason</h6>
+          <p id="rejectionText" class="mb-0 small-muted"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Uploaded Documents -->
+  <div class="row g-3 mt-3">
+    <div class="col-12">
+      <div class="card p-4">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <h6 class="mb-0">Uploaded Documents</h6>
+          <div class="small-muted">Your submitted files</div>
+        </div>
+
+        <div id="documentsList" class="documents-list">
+          <!-- JS can insert .doc-item entries here like:
+               <div class="doc-item d-flex justify-content-between align-items-center">
+                 <div><strong>Passport.pdf</strong><div class="small-muted">Uploaded 2025-10-01</div></div>
+                 <div><button class="btn btn-sm btn-outline-secondary">View</button></div>
+               </div>
+          -->
+        </div>
+
+        <p id="noDocsMessage" class="text-center small-muted mt-3" style="display:none;">No documents uploaded yet</p>
+      </div>
+    </div>
 
   <div id="loading" style="display:none;">
     <div class="spinner"></div>
@@ -360,230 +531,276 @@
 </main>
 
 <script>
-  const userEmailEl = document.getElementById('userEmail');
-  const logoutBtn = document.getElementById('logoutBtn');
-  const welcomeMessageEl = document.getElementById('welcomeMessage');
-  const noApplicationEl = document.getElementById('noApplication');
-  const applicationSectionEl = document.getElementById('applicationSection');
-  const startApplicationBtn = document.getElementById('startApplicationBtn');
-  const loadingEl = document.getElementById('loading');
+/* ========= CONFIG ========= */
+const BASE_API_URL = 'http://localhost:4000'; // change if backend runs elsewhere
+const TOKEN_KEY = 'token'; // this matches your login code which saves 'token'
+const SESSION_KEY = 'loginTime';
+const MAX_SESSION_DURATION = 30 * 60 * 1000; // 30 minutes
 
-  const statusBadgeEl = document.getElementById('statusBadge');
-  const decisionDateEl = document.getElementById('decisionDate');
-  const accountTypeEl = document.getElementById('accountType');
-  const initialDepositEl = document.getElementById('initialDeposit');
-  const documentCountEl = document.getElementById('documentCount');
-  const riskCardEl = document.getElementById('riskCard');
-  const riskScoreEl = document.getElementById('riskScore');
-  const riskLevelEl = document.getElementById('riskLevel');
-  const fullNameEl = document.getElementById('fullName');
-  const dobEl = document.getElementById('dob');
-  const phoneEl = document.getElementById('phone');
-  const employmentStatusEl = document.getElementById('employmentStatus');
-  const addressEl = document.getElementById('address');
-  const rejectionReasonEl = document.getElementById('rejectionReason');
-  const rejectionTextEl = document.getElementById('rejectionText');
-  const documentsListEl = document.getElementById('documentsList');
-  const noDocsMessageEl = document.getElementById('noDocsMessage');
+/* ========= Session & Redirect ========= */
+function getToken() {
+  return localStorage.getItem(TOKEN_KEY);
+}
+function setLoginTime() {
+  localStorage.setItem(SESSION_KEY, Date.now());
+}
+function clearSessionAndRedirect() {
+  localStorage.removeItem(TOKEN_KEY);
+  localStorage.removeItem(SESSION_KEY);
+  localStorage.removeItem('userId');
+  alert('Session expired or not logged in. Please sign in again.');
+  window.location.href = 'login.html';
+}
 
-  // Helper for date formatting
-  function formatDate(dateStr) {
-    const options = { year: 'numeric', month: 'short', day: 'numeric' };
-    return new Date(dateStr).toLocaleDateString(undefined, options);
+// initial session check
+(function checkSession() {
+  const token = getToken();
+  const loginTime = localStorage.getItem(SESSION_KEY);
+  if (!token || !loginTime) {
+    clearSessionAndRedirect();
+    return;
   }
-
-  // Set status badge styles and text
-  function setStatusBadge(status) {
-    const s = status.toUpperCase();
-    statusBadgeEl.textContent = s;
-    statusBadgeEl.className = 'status-badge';
-
-    if (s === 'APPROVED') {
-      statusBadgeEl.classList.add('status-approved');
-    } else if (s === 'PENDING') {
-      statusBadgeEl.classList.add('status-pending');
-    } else if (s === 'REJECTED') {
-      statusBadgeEl.classList.add('status-rejected');
-    }
+  const elapsed = Date.now() - parseInt(loginTime, 10);
+  if (elapsed > MAX_SESSION_DURATION) {
+    clearSessionAndRedirect();
+    return;
   }
+  // Reset session timer on user activity
+  ['click', 'mousemove', 'keypress', 'scroll'].forEach(evt =>
+    window.addEventListener(evt, () => setLoginTime())
+  );
+})();
 
-  // Simulated API call helpers (replace these with real API calls)
-  async function fetchCustomer() {
-    // Simulate fetch delay
-    return new Promise(resolve => {
-      setTimeout(() => {
-        // Fake customer data - you can change this to simulate no application
-        resolve({
-          first_name: "Jane",
-          last_name: "Doe",
-          email: "jane.doe@example.com",
-          date_of_birth: "1990-04-15",
-          phone: "+1234567890",
-          employment_status: "FULL_TIME",
-          address_line1: "123 Elm Street",
-          city: "Springfield",
-          postal_code: "12345",
-          country: "USA",
-          account_type: "CUSTOMER",
-          initial_deposit: "10000",
-          status: "APPROVED",  // Try PENDING or REJECTED to test
-          decision_date: "2023-09-15T00:00:00Z",
-          rejection_reason: "" // Fill reason if rejected
-        });
-      }, 1000);
-    });
-  }
+/* ========= Element References ========= */
 
-  async function fetchDocuments() {
-    return new Promise(resolve => {
-      setTimeout(() => {
-        resolve([
-          { id: 1, file_name: "passport.pdf", file_size: 204800, uploaded_at: "2023-08-01T12:34:56Z" },
-          { id: 2, file_name: "bank_statement.pdf", file_size: 102400, uploaded_at: "2023-08-05T15:12:00Z" }
-        ]);
-      }, 1200);
-    });
-  }
+const userEmailEl = document.getElementById('userEmail');
+const logoutBtn = document.getElementById('logoutBtn');
+const welcomeMessageEl = document.getElementById('welcomeMessage');
+const noApplicationEl = document.getElementById('noApplication');
+const applicationSectionEl = document.getElementById('applicationSection');
+const startApplicationBtn = document.getElementById('startApplicationBtn');
+const loadingEl = document.getElementById('loading');
 
-  async function fetchRiskScore() {
-    return new Promise(resolve => {
-      setTimeout(() => {
-        resolve({ score: 75, risk_level: "Moderate" });
-      }, 800);
-    });
-  }
+const statusBadgeEl = document.getElementById('statusBadge');
+const decisionDateEl = document.getElementById('decisionDate');
+const accountTypeEl = document.getElementById('accountType');
+const initialDepositEl = document.getElementById('initialDeposit');
+const documentCountEl = document.getElementById('documentCount');
+const riskCardEl = document.getElementById('riskCard');
+const riskScoreEl = document.getElementById('riskScore');
+const riskLevelEl = document.getElementById('riskLevel');
+const fullNameEl = document.getElementById('fullName');
+const dobEl = document.getElementById('dob');
+const phoneEl = document.getElementById('phone');
+const employmentStatusEl = document.getElementById('employmentStatus');
+const addressEl = document.getElementById('address');
+const rejectionReasonEl = document.getElementById('rejectionReason');
+const rejectionTextEl = document.getElementById('rejectionText');
+const documentsListEl = document.getElementById('documentsList');
+const noDocsMessageEl = document.getElementById('noDocsMessage');
 
-  async function logout() {
-    alert('Logging out...'); // Replace with actual logout logic
-    window.location.href = '/login.html'; // Redirect to login
-  }
-
-  logoutBtn.addEventListener('click', logout);
-
-  async function loadDashboard() {
-    loadingEl.style.display = 'block';
-    noApplicationEl.style.display = 'none';
-    applicationSectionEl.style.display = 'none';
-
-    try {
-      const [customer, documents, riskScore] = await Promise.all([
-        fetchCustomer(),
-        fetchDocuments(),
-        fetchRiskScore()
-      ]);
-
-      userEmailEl.textContent = customer.email || "user@example.com";
-
-      const hasApplication = !!customer;
-
-      if (!hasApplication) {
-        welcomeMessageEl.textContent = "Get started by submitting your application for banking services.";
-        noApplicationEl.style.display = 'block';
-      } else {
-        welcomeMessageEl.textContent = "Track your application status and manage your documents below.";
-
-        // Show application section and fill data
-        applicationSectionEl.style.display = 'block';
-
-        setStatusBadge(customer.status);
-
-        if (customer.decision_date) {
-          decisionDateEl.textContent = `Decided on ${formatDate(customer.decision_date)}`;
-          decisionDateEl.style.display = 'block';
-        } else {
-          decisionDateEl.style.display = 'none';
-        }
-
-        accountTypeEl.textContent = customer.account_type;
-        initialDepositEl.textContent = `Initial Deposit: $${Number(customer.initial_deposit).toLocaleString()}`;
-
-        documentCountEl.textContent = documents.length || 0;
-
-        if (riskScore) {
-          riskCardEl.style.display = 'block';
-          riskScoreEl.textContent = riskScore.score;
-          riskLevelEl.textContent = riskScore.risk_level;
-        } else {
-          riskCardEl.style.display = 'none';
-        }
-
-        fullNameEl.textContent = customer.first_name + " " + customer.last_name;
-        dobEl.textContent = customer.date_of_birth;
-        phoneEl.textContent = customer.phone;
-        employmentStatusEl.textContent = customer.employment_status.replace('_', ' ');
-        addressEl.textContent = `${customer.address_line1}, ${customer.city}, ${customer.postal_code}, ${customer.country}`;
-
-        if (customer.rejection_reason) {
-          rejectionReasonEl.style.display = 'block';
-          rejectionTextEl.textContent = customer.rejection_reason;
-        } else {
-          rejectionReasonEl.style.display = 'none';
-        }
-
-        // Documents list
-        if (documents.length === 0) {
-          noDocsMessageEl.style.display = 'block';
-          documentsListEl.innerHTML = '';
-        } else {
-          noDocsMessageEl.style.display = 'none';
-          documentsListEl.innerHTML = '';
-          documents.forEach(doc => {
-            const docDiv = document.createElement('div');
-
-            const infoDiv = document.createElement('div');
-            infoDiv.className = 'documents-info';
-
-            const iconSpan = document.createElement('span');
-            iconSpan.className = 'documents-icon';
-            iconSpan.textContent = '📄';
-
-            const metaDiv = document.createElement('div');
-
-            const nameP = document.createElement('p');
-            nameP.textContent = doc.file_name;
-            nameP.style.fontWeight = '600';
-            const sizeDateP = document.createElement('p');
-            sizeDateP.className = 'documents-meta';
-            sizeDateP.textContent = `${(doc.file_size / 1024).toFixed(2)} KB • Uploaded ${formatDate(doc.uploaded_at)}`;
-
-            metaDiv.appendChild(nameP);
-            metaDiv.appendChild(sizeDateP);
-
-            infoDiv.appendChild(iconSpan);
-            infoDiv.appendChild(metaDiv);
-
-            const downloadBtn = document.createElement('button');
-            downloadBtn.className = 'btn-outline';
-            downloadBtn.textContent = 'Download';
-            downloadBtn.onclick = () => {
-              // Open document download in new tab
-              window.open(`/api/customers/me/documents/${doc.id}`, '_blank');
-            };
-
-            docDiv.appendChild(infoDiv);
-            docDiv.appendChild(downloadBtn);
-
-            documentsListEl.appendChild(docDiv);
-          });
-        }
-      }
-    } catch (error) {
-      alert("Error loading dashboard data.");
-      console.error(error);
-    } finally {
-      loadingEl.style.display = 'none';
-    }
-  }
-
-  startApplicationBtn.onclick = () => {
-    alert('Redirecting to application page...'); 
-    // Replace with your actual navigation
-    window.location.href = '/customer/apply.html';
+/* ========= Helpers ========= */
+function formatDate(dateStr) {
+  if (!dateStr) return "N/A";
+  const options = { year: 'numeric', month: 'short', day: 'numeric' };
+  return new Date(dateStr).toLocaleDateString(undefined, options);
+}
+function setStatusBadge(status) {
+  const s = (status || '').toUpperCase();
+  statusBadgeEl.textContent = s;
+  statusBadgeEl.className = 'status-badge';
+  if (s === 'APPROVED') statusBadgeEl.classList.add('status-approved');
+  else if (s === 'DRAFT') statusBadgeEl.classList.add('status-pending');
+  else if (s === 'REJECTED') statusBadgeEl.classList.add('status-rejected');
+}
+function authHeaders() {
+  const token = getToken();
+  return {
+    'Content-Type': 'application/json',
+    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
   };
+}
 
-  // On load
-  loadDashboard();
+/* ========= API Calls (SEND AUTH HEADER) ========= */
+// Get current customer record from /api/customers/me
+async function fetchCurrentCustomer() {
+  const res = await fetch(`${BASE_API_URL}/api/customers/me`, {
+    headers: authHeaders()
+  });
+  if (res.status === 404) return null;
+  if (!res.ok) {
+    const text = await res.text().catch(() => null);
+    throw new Error(`Failed to fetch current customer: ${res.status} ${text || ''}`);
+  }
+  return res.json();
+}
 
+// Get customer documents by customerId
+async function fetchDocumentsForCustomer(customerId) {
+  if (!customerId) return [];
+  const response = await fetch(`${BASE_API_URL}/api/customers/${customerId}/documents`, {
+    headers: authHeaders()
+  });
+  if (!response.ok) {
+    console.warn('fetchDocumentsForCustomer failed', response.status);
+    return [];
+  }
+  return response.json();
+}
+
+// Get or calculate customer risk score by customerId
+async function fetchRiskScoreForCustomer(customerId) {
+  if (!customerId) return null;
+  let response = await fetch(`${BASE_API_URL}/api/customers/${customerId}/risk-score`, {
+    headers: authHeaders()
+  });
+  if (response.ok) {
+    const data = await response.json();
+    return data.riskScore || null;
+  }
+  // If not found, try to calculate (POST)
+  response = await fetch(`${BASE_API_URL}/api/customers/${customerId}/calculate-risk`, {
+    method: 'POST',
+    headers: authHeaders()
+  });
+  if (!response.ok) {
+    console.warn('Failed to calculate risk for', customerId, response.status);
+    return null;
+  }
+  const data = await response.json();
+  return data.riskScore || null;
+}
+
+/* ========= Logout ========= */
+async function logout() {
+  // remove token + session data
+  localStorage.removeItem(TOKEN_KEY);
+  localStorage.removeItem(SESSION_KEY);
+  localStorage.removeItem('userId');
+  window.location.href = 'login.html';
+}
+logoutBtn.addEventListener('click', logout);
+
+/* ========= Dashboard Loader ========= */
+async function loadDashboard() {
+  loadingEl.style.display = 'block';
+  noApplicationEl.style.display = 'none';
+  applicationSectionEl.style.display = 'none';
+
+  try {
+    const customer = await fetchCurrentCustomer();
+
+    if (!customer || !customer.id) {
+      welcomeMessageEl.textContent = "Get started by submitting your application for banking services.";
+      noApplicationEl.style.display = 'block';
+      userEmailEl.textContent = (localStorage.getItem('userId') || 'user@example.com');
+      return;
+    }
+
+    const customerId = customer.id;
+    const [documents, riskScore] = await Promise.all([
+      fetchDocumentsForCustomer(customerId),
+      fetchRiskScoreForCustomer(customerId)
+    ]);
+ 
+  const userEmailEl = document.getElementById('userEmail');
+const token = getToken();
+const payload = JSON.parse(atob(token.split('.')[1]));
+    userEmailEl.textContent = payload.email
+    userEmailEl.textContent = customer.email || payload.email|| (localStorage.getItem('userId') || "user@example.com");
+    welcomeMessageEl.textContent = "Track your application status and manage your documents below.";
+    applicationSectionEl.style.display = 'block';
+
+    setStatusBadge(customer.status);
+    if (customer.decision_date) {
+      decisionDateEl.textContent = `Decided on ${formatDate(customer.decision_date)}`;
+      decisionDateEl.style.display = 'block';
+    } else {
+      decisionDateEl.style.display = 'none';
+    }
+    accountTypeEl.textContent = customer.account_type || 'N/A';
+    try { initialDepositEl.textContent = `Initial Deposit: $${Number(customer.initial_deposit || 0).toLocaleString()}`; }
+    catch (e) { initialDepositEl.textContent = `Initial Deposit: N/A`; }
+    documentCountEl.textContent = (Array.isArray(documents) ? documents.length : 0);
+
+    if (riskScore) {
+      riskCardEl.style.display = 'block';
+      riskScoreEl.textContent = (riskScore.score ?? 'N/A');
+      riskLevelEl.textContent = (riskScore.risk_level ?? 'N/A');
+    } else {
+      riskCardEl.style.display = 'none';
+    }
+
+    fullNameEl.textContent = `${customer.first_name || ''} ${customer.last_name || ''}`.trim() || 'N/A';
+    dobEl.textContent = formatDate(customer.date_of_birth);
+    phoneEl.textContent = customer.phone || 'N/A';
+    employmentStatusEl.textContent = (customer.employment_status || '').replace('_', ' ') || 'N/A';
+    addressEl.textContent = [customer.address_line1, customer.city, customer.postal_code, customer.country].filter(Boolean).join(', ') || 'N/A';
+
+    if (customer.rejection_reason) {
+      rejectionReasonEl.style.display = 'block';
+      rejectionTextEl.textContent = customer.rejection_reason;
+    } else {
+      rejectionReasonEl.style.display = 'none';
+    }
+
+    if (!documents || documents.length === 0) {
+      noDocsMessageEl.style.display = 'block';
+      documentsListEl.innerHTML = '';
+    } else {
+      noDocsMessageEl.style.display = 'none';
+      documentsListEl.innerHTML = '';
+
+      documents.forEach(doc => {
+        const docDiv = document.createElement('div');
+        const infoDiv = document.createElement('div');
+        infoDiv.className = 'documents-info';
+        const iconSpan = document.createElement('span');
+        iconSpan.className = 'documents-icon';
+        iconSpan.textContent = '📄';
+        const metaDiv = document.createElement('div');
+        const nameP = document.createElement('p');
+        nameP.textContent = doc.file_name || 'document';
+        nameP.style.fontWeight = '600';
+        const sizeDateP = document.createElement('p');
+        sizeDateP.className = 'documents-meta';
+        const sizeKb = doc.file_size ? (doc.file_size / 1024).toFixed(2) : 'N/A';
+        sizeDateP.textContent = `${sizeKb} KB • Uploaded ${formatDate(doc.uploaded_at)}`;
+        metaDiv.appendChild(nameP);
+        metaDiv.appendChild(sizeDateP);
+        infoDiv.appendChild(iconSpan);
+        infoDiv.appendChild(metaDiv);
+
+        const downloadBtn = document.createElement('button');
+        downloadBtn.className = 'btn-outline';
+        downloadBtn.textContent = 'Download';
+        // include BASE_API_URL and auth header is handled by server for download; using anchor to open
+        downloadBtn.onclick = () => {
+          // open in new tab using absolute URL (server should check auth via cookie/header)
+          // We cannot add header to window.open; ensure the server accepts token via cookie or provide a signed download link
+          // For now, open the endpoint — the browser will send cookie if you use cookie-based auth
+          window.open(`${BASE_API_URL}/api/customers/${customerId}/documents/${doc.id}`, '_blank');
+        };
+
+        docDiv.appendChild(infoDiv);
+        docDiv.appendChild(downloadBtn);
+        documentsListEl.appendChild(docDiv);
+      });
+    }
+
+  } catch (error) {
+    alert("Error loading dashboard data. Check console for details.");
+    console.error('loadDashboard error:', error);
+  } finally {
+    loadingEl.style.display = 'none';
+  }
+}
+
+startApplicationBtn.onclick = () => {
+  window.location.href = '/customer/apply.html';
+};
+
+loadDashboard();
 </script>
 
 </body>

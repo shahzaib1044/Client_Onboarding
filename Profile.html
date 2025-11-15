@@ -1,0 +1,647 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Customer Registration</title>
+
+  <!-- Bootstrap 5 CDN -->
+   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <style>
+    /* Small custom styles */
+    .error { color: #dc3545; font-size: 0.9em; }
+    .valid { color: #198754; font-size: 0.9em; }
+    .currency-input { text-align: right; }
+    .spinner-border-sm { width: 1rem; height: 1rem; border-width: .15rem; }
+    
+    
+    button:disabled {
+      background: #9fc3ff;
+      cursor: not-allowed;
+    }
+
+    .footer-text {
+      text-align: center;
+      font-size: 14px;
+      color: #666;
+      margin-top: 15px;
+    }
+
+    .footer-text a {
+      color: #007bff;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .footer-text a:hover {
+      text-decoration: underline;
+    }
+      .icon {
+      width: 60px;
+      height: 60px;
+      background: #007bff;
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 10px;
+      font-size: 28px;
+    }
+
+  </style>
+</head>
+<body class="bg-light">
+    <!-- ================= HEADER / NAVBAR ================= -->
+<nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm px-4">
+  <div class="container-fluid">
+
+    <!-- Branding -->
+    <a class="navbar-brand d-flex align-items-center" href="#">
+      <span class="branding-icon">📄</span>
+      <div>
+        <h5 class="m-0 fw-bold">Client Onboarding</h5>
+        <small class="text-muted">Customer Portal</small>
+      </div>
+    </a>
+
+    <!-- Hamburger (Mobile) -->
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <!-- Navbar Items -->
+    <div class="collapse navbar-collapse" id="mainNavbar">
+      <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+
+        <!-- Active page gets "active" class -->
+        <li class="nav-item">
+          <a class="nav-link " href="Customer_Dashboard.html">Dashboard</a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link active" href="Profile.html">Profile</a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link" href="#">Documents</a>
+        </li>
+
+        <li class="nav-item d-lg-none">
+          <!-- Only shows on mobile -->
+          <a class="nav-link text-danger" href="#" id="logoutBtnMobile">Logout</a>
+        </li>
+
+      </ul>
+
+      <!-- User information (Only visible on large screens) -->
+      <div class="d-none d-lg-block text-end me-3">
+        <p class="m-0 fw-semibold" id="userEmail">user@example.com</p>
+        <small class="text-muted">Customer Account</small>
+      </div>
+
+      <!-- Logout button (desktop only) -->
+      <button id="logoutBtn" class="btn btn-outline-danger d-none d-lg-block">
+        Logout
+      </button>
+
+    </div>
+  </div>
+</nav>
+
+<nav aria-label="breadcrumb" class="bg-white px-4 py-2 shadow-sm">
+  <ol class="breadcrumb m-0">
+
+    <!-- Dashboard (active - no link) -->
+    <li class="breadcrumb-item active" aria-current="page">
+      Profile
+    </li>
+
+    <!-- Profile -->
+    <li class="breadcrumb-item">
+      <a href="Customer_Dashboard.html">Dashboard</a>
+    </li>
+
+    <!-- Documents -->
+    <li class="breadcrumb-item">
+      <a href="documents.html">Documents</a>
+    </li>
+
+  </ol>
+</nav>
+  <div class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+        <div class="card shadow-sm">
+          <div class="card-body">
+    <div class="text-center">
+  <div class="icon">🏢</div>
+  <h2>Profile</h2>
+    <p>Update your personal information</p>
+</div>
+
+
+            <form id="registerForm" novalidate>
+              <div class="row g-3">
+                <!-- First / Last -->
+                <div class="col-md-6">
+                  <label for="firstName" class="form-label">First Name *</label>
+                  <input type="text" id="firstName" class="form-control" maxlength="50" required>
+                  <div class="error" id="firstNameError"></div>
+                </div>
+                <div class="col-md-6">
+                  <label for="lastName" class="form-label">Last Name *</label>
+                  <input type="text" id="lastName" class="form-control" maxlength="50" required>
+                  <div class="error" id="lastNameError"></div>
+                </div>
+
+
+                <div class="col-md-6">
+                  <label for="phone" class="form-label">Phone *</label>
+                  <input type="tel" id="phone" class="form-control" placeholder="+XXX XXXXXXXXX" required>
+                  <div class="error" id="phoneError"></div>
+                </div>
+
+                <!-- DOB / Address -->
+                <div class="col-md-6">
+                  <label for="dob" class="form-label">Date of Birth *</label>
+                  <input type="date" id="dob" class="form-control" required>
+                  <div class="error" id="dobError"></div>
+                </div>
+
+                <div class="col-md-6">
+                  <label for="address1" class="form-label">Address Line 1 *</label>
+                  <input type="text" id="address1" class="form-control" maxlength="100" required>
+                  <div class="error" id="address1Error"></div>
+                </div>
+
+                <!-- City / Postal / Country -->
+                <div class="col-md-4">
+                  <label for="city" class="form-label">City *</label>
+                  <input type="text" id="city" class="form-control" maxlength="50" required>
+                  <div class="error" id="cityError"></div>
+                </div>
+                <div class="col-md-4">
+                  <label for="postalCode" class="form-label">Postal Code *</label>
+                  <input type="text" id="postalCode" class="form-control" required>
+                  <div class="error" id="postalCodeError"></div>
+                </div>
+                <div class="col-md-4">
+                  <label for="country" class="form-label">Country *</label>
+                  <select id="country" class="form-select" required>
+                    <option value="">Select country</option>
+                    <!-- Short list; replace with full country list as needed -->
+                    <option value="FI">Finland</option>
+                    <option value="PK">Pakistan</option>
+                    <option value="US">United States</option>
+                    <option value="IE">Ireland</option>
+                    <option value="DE">Germany</option>
+                  </select>
+                  <div class="error" id="countryError"></div>
+                </div>
+
+                <!-- ID Number -->
+                <div class="col-md-6">
+                  <label for="idNumber" class="form-label">ID Number *</label>
+                  <input type="text" id="idNumber" class="form-control" maxlength="20" required>
+                  <div class="d-flex justify-content-between">
+                    <div class="error" id="idNumberError"></div>
+                    <div class="valid" id="idNumberValid"></div>
+                  </div>
+                </div>
+
+                <!-- Annual Income / Employment Status -->
+                <div class="col-md-6">
+                  <label for="annualIncome" class="form-label">Annual Income (€) *</label>
+                  <input type="text" id="annualIncome" class="form-control currency-input" placeholder="€0.00" required>
+                  <div class="error" id="annualIncomeError"></div>
+                </div>
+
+                <div class="col-md-6">
+                  <label for="employmentStatus" class="form-label">Employment Status *</label>
+                  <select id="employmentStatus" class="form-select" required>
+                    <option value="">Select</option>
+                    <option>UNEMPLOYED</option>
+                    <option>PART_TIME</option>
+                    <option>FULL_TIME</option>
+                    <option>SELF_EMPLOYED</option>
+                    <option>RETIRED</option>
+                  </select>
+                  <div class="error" id="employmentStatusError"></div>
+                </div>
+
+                <!-- Account Type (radio) / Initial Deposit -->
+                <fieldset class="col-md-6">
+                  <legend class="col-form-label">Account Type *</legend>
+                  <div>
+                    <div class="form-check form-check-inline">
+                      <input class="form-check-input" type="radio" name="accountType" id="acctBasic" value="BASIC" required>
+                      <label class="form-check-label" for="acctBasic">BASIC</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                      <input class="form-check-input" type="radio" name="accountType" id="acctStandard" value="STANDARD">
+                      <label class="form-check-label" for="acctStandard">STANDARD</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                      <input class="form-check-input" type="radio" name="accountType" id="acctPremium" value="PREMIUM">
+                      <label class="form-check-label" for="acctPremium">PREMIUM</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                      <input class="form-check-input" type="radio" name="accountType" id="acctBusiness" value="BUSINESS">
+                      <label class="form-check-label" for="acctBusiness">BUSINESS</label>
+                    </div>
+                  </div>
+                  <div class="error" id="accountTypeError"></div>
+                </fieldset>
+
+                <div class="col-md-6">
+                  <label for="initialDeposit" class="form-label">Initial Deposit (€) *</label>
+                  <input type="text" id="initialDeposit" class="form-control currency-input" placeholder="€0.00" required>
+                  <div class="error" id="initialDepositError"></div>
+                </div>
+
+<div class="col-md-6">
+  <label for="currentPassword" class="form-label">Current Password</label>
+  <input type="password" id="currentPassword" class="form-control" autocomplete="current-password">
+  <div class="error" id="currentPasswordError"></div>
+</div>
+<div class="col-md-6">
+  <label for="newPassword" class="form-label">New Password</label>
+  <input type="password" id="newPassword" class="form-control" minlength="8" autocomplete="new-password">
+  <div class="error" id="newPasswordError"></div>
+</div>
+<div class="col-md-6">
+  <label for="confirmNewPassword" class="form-label">Confirm New Password</label>
+  <input type="password" id="confirmNewPassword" class="form-control" autocomplete="new-password">
+  <div class="error" id="confirmNewPasswordError"></div>
+</div>
+
+
+              
+
+                <!-- Submit -->
+                <div >
+                  <div id="formMessage" role="status" aria-live="polite"></div>
+                  <div>
+                    <button type="submit" id="submitBtn" class="btn btn-primary  w-100" disabled>
+                      <span id="submitSpinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                      <span id="submitTxt">Update</span>
+                    </button>
+                  </div>
+                </div>
+
+              </div>
+               
+            </form>
+
+            <!-- Success template -->
+            <div id="successBox" class="alert alert-success mt-4 d-none" role="alert">
+              <strong>Updation successful!</strong>
+              <div id="successMessage" class="mt-2"></div>
+            </div>
+
+            <!-- Error summary -->
+            <div id="serverErrors" class="alert alert-danger mt-3 d-none"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS & Popper -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    
+/* ---------- CONFIG: provide these if not present ---------- */
+const BASE_API_URL = "http://localhost:4000"; // set as needed
+const TOKEN_KEY = 'token';
+const userEmailEl = document.getElementById('userEmail');
+const token = getToken();
+const payload = JSON.parse(atob(token.split('.')[1]));
+    userEmailEl.textContent = payload.email
+    userEmailEl.textContent =  payload.email|| (localStorage.getItem('userId') || "user@example.com");
+const SESSION_KEY = 'loginTime';
+const MAX_SESSION_DURATION = 30 * 60 * 1000; // 30 minutes
+
+/* ========= Session & Redirect ========= */
+function getToken() {
+  return localStorage.getItem(TOKEN_KEY);
+}
+function setLoginTime() {
+  localStorage.setItem(SESSION_KEY, Date.now());
+}
+function clearSessionAndRedirect() {
+  localStorage.removeItem(TOKEN_KEY);
+  localStorage.removeItem(SESSION_KEY);
+  localStorage.removeItem('userId');
+  alert('Session expired or not logged in. Please sign in again.');
+  window.location.href = 'login.html';
+}
+
+// initial session check
+(function checkSession() {
+  const token = getToken();
+  const loginTime = localStorage.getItem(SESSION_KEY);
+  if (!token || !loginTime) {
+    clearSessionAndRedirect();
+    return;
+  }
+  const elapsed = Date.now() - parseInt(loginTime, 10);
+  if (elapsed > MAX_SESSION_DURATION) {
+    clearSessionAndRedirect();
+    return;
+  }
+  // Reset session timer on user activity
+  ['click', 'mousemove', 'keypress', 'scroll'].forEach(evt =>
+    window.addEventListener(evt, () => setLoginTime())
+  );
+})();
+
+function getToken() {
+  return localStorage.getItem(TOKEN_KEY);
+}
+
+// Safe authHeaders — does NOT call authHeaders() inside itself
+function authHeaders() {
+  const token = getToken();
+  if (!token) return {};
+  return {
+    'Authorization': `Bearer ${token}`,
+    // do not set Content-Type globally for GET with no body; set in specific fetch calls
+  };
+}
+
+/* ========= Logout ========= */
+async function logout() {
+  // remove token + session data
+  localStorage.removeItem(TOKEN_KEY);
+  localStorage.removeItem(SESSION_KEY);
+  localStorage.removeItem('userId');
+  window.location.href = 'login.html';
+}
+logoutBtn.addEventListener('click', logout);
+
+async function fetchCurrentCustomer() { 
+  const url = `${BASE_API_URL}/api/customers/me`;
+  const headers = authHeaders();
+
+  console.log('------------------------------------------------');
+  console.log('[fetchCurrentCustomer] REQUEST');
+  console.log('URL:', url);
+  console.log('Headers:', headers);
+
+  const res = await fetch(url, {
+    method: 'GET',
+    headers: {
+      ...headers,
+      'Accept': 'application/json'
+    }
+  });
+
+  console.log('------------------------------------------------');
+  console.log('[fetchCurrentCustomer] RESPONSE');
+  console.log('Status:', res.status, res.statusText);
+
+  // Read raw body first (for debugging)
+  const rawText = await res.text();
+  console.log('[fetchCurrentCustomer] Raw Body:', rawText);
+
+  // Handle errors
+  if (res.status === 404) {
+    console.warn('[fetchCurrentCustomer] 404 Not Found');
+    return null;
+  }
+
+  if (!res.ok) {
+    console.error('[fetchCurrentCustomer] Request Failed');
+    throw new Error(`Fetch Error: ${res.status}`);
+  }
+
+  // Try parsing JSON
+  let data = null;
+  try {
+    data = JSON.parse(rawText);
+  } catch (err) {
+    console.error('[fetchCurrentCustomer] JSON Parse Error:', err);
+    return null;
+  }
+
+  console.log('[fetchCurrentCustomer] Parsed JSON:', data);
+
+  return data;
+}
+
+
+/* ---------- helper validation ---------- */
+function validatePasswordRules(pw) {
+  // basic example rules, adapt as you need
+  if (!pw || pw.length < 8) return 'Password must be at least 8 characters.';
+  if (!/[A-Z]/.test(pw)) return 'Include at least 1 uppercase letter.';
+  if (!/[a-z]/.test(pw)) return 'Include at least 1 lowercase letter.';
+  if (!/[0-9]/.test(pw)) return 'Include at least 1 digit.';
+  // optionally: special char
+  return '';
+}
+
+let CURRENT_CUSTOMER_ID = null;
+
+function normalizeDateForInput(value) {
+  if (!value) return '';
+  // if already YYYY-MM-DD return
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
+  const d = new Date(value);
+  if (!isNaN(d.getTime())) {
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
+  }
+  return '';
+}
+
+function safeSetValue(id, value) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  // convert non-strings to string for input.value
+  el.value = (value === undefined || value === null) ? '' : String(value);
+}
+/* ---------- populate form ---------- */
+document.addEventListener('DOMContentLoaded', async () => {
+  const submitBtn = document.getElementById('submitBtn');
+  const submitSpinner = document.getElementById('submitSpinner');
+  const formMessage = document.getElementById('formMessage');
+
+  try {
+    const data = await fetchCurrentCustomer();
+    if (!data) {
+      formMessage.innerText = 'Customer record not found';
+      return;
+    }
+    // Fill fields you want editable (never fill password)
+    document.getElementById('firstName').value = data.first_name || '';
+    document.getElementById('lastName').value = data.last_name || '';
+    document.getElementById('phone').value = data.phone || '';
+    document.getElementById('dob').value = data.date_of_birth || '';
+    document.getElementById('address1').value = data.address_line1 || '';
+    document.getElementById('city').value = data.city || '';
+    document.getElementById('postalCode').value = data.postal_code || '';
+    document.getElementById('country').value = data.country || '';
+    document.getElementById('idNumber').value = data.id_number || '';
+    document.getElementById('annualIncome').value = data.annual_income || '';
+    document.getElementById('employmentStatus').value = data.employment_status || '';
+    // accountType radio
+    if (data.account_type) {
+      const radio = document.querySelector(`input[name="accountType"][value="${data.account_type}"]`);
+      if (radio) radio.checked = true;
+    }
+    document.getElementById('initialDeposit').value = data.initial_deposit || '';
+
+    // enable submit once loaded
+    submitBtn.disabled = false;
+    submitBtn.addEventListener('click', onSubmit);
+  } catch (err) {
+    console.error(err);
+    formMessage.innerText = 'Failed to load profile.';
+  }
+
+  async function onSubmit(e) {
+    e.preventDefault();
+    clearErrors();
+
+    const idFromServer = null; // we need the user/customer id — either include it in fetchCurrentCustomer() response (recommended)
+    // if fetchCurrentCustomer returns id: use it, else you can use another endpoint or save it earlier.
+    let customerId;
+    try {
+      const me = await fetchCurrentCustomer(); // call again to get id if needed
+      customerId = me?.id;
+      if (!customerId) throw new Error('No customer id returned by /me');
+    } catch (err) {
+      document.getElementById('formMessage').innerText = 'Unable to determine customer id.';
+      return;
+    }
+
+    // collect visible fields
+    const payload = {
+      first_name: document.getElementById('firstName').value.trim(),
+      last_name: document.getElementById('lastName').value.trim(),
+    
+      phone: document.getElementById('phone').value.trim(),
+      date_of_birth: document.getElementById('dob').value,
+      address_line1: document.getElementById('address1').value.trim(),
+      city: document.getElementById('city').value.trim(),
+      postal_code: document.getElementById('postalCode').value.trim(),
+      country: document.getElementById('country').value,
+      id_number: document.getElementById('idNumber').value.trim(),
+      annual_income: document.getElementById('annualIncome').value.trim(),
+      employment_status: document.getElementById('employmentStatus').value,
+      account_type: document.querySelector('input[name="accountType"]:checked')?.value,
+      initial_deposit: document.getElementById('initialDeposit').value.trim()
+    };
+
+    // PASSWORD logic:
+    const currentPassword = document.getElementById('currentPassword')?.value || '';
+    const newPassword = document.getElementById('newPassword')?.value || '';
+    const confirmNewPassword = document.getElementById('confirmNewPassword')?.value || '';
+
+    if (newPassword || confirmNewPassword || currentPassword) {
+      // user intends to change password -> require current + new + confirm
+      if (!currentPassword) {
+        showError('currentPasswordError', 'Enter your current password to change password.');
+        return;
+      }
+      const pwRuleErr = validatePasswordRules(newPassword);
+      if (pwRuleErr) {
+        showError('newPasswordError', pwRuleErr);
+        return;
+      }
+      if (newPassword !== confirmNewPassword) {
+        showError('confirmNewPasswordError', 'Passwords do not match.');
+        return;
+      }
+      // attach password fields to payload:
+      // NOTE: server must verify currentPassword and perform hashing.
+      payload.currentPassword = currentPassword;
+      payload.password = newPassword;
+    }
+
+    // disable UI
+    submitBtn.disabled = true;
+    submitSpinner.classList.remove('d-none');
+    document.getElementById('submitTxt').innerText = 'Updating...';
+    document.getElementById('formMessage').innerText = '';
+
+    try {
+      const res = await fetch(`${BASE_API_URL}/api/customers/${customerId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          ...authHeaders()
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const body = await res.json().catch(() => null);
+      if (!res.ok) {
+        const errMsg = body?.message || (body?.error?.message) || `Update failed: ${res.status}`;
+        handleServerError(errMsg, body);
+        return;
+      }
+
+      // success
+      document.getElementById('successBox').classList.remove('d-none');
+      document.getElementById('successMessage').innerText = 'Profile updated successfully';
+      // clear password inputs
+      if (document.getElementById('currentPassword')) document.getElementById('currentPassword').value = '';
+      if (document.getElementById('newPassword')) document.getElementById('newPassword').value = '';
+      if (document.getElementById('confirmNewPassword')) document.getElementById('confirmNewPassword').value = '';
+    } catch (err) {
+      console.error(err);
+      document.getElementById('serverErrors').classList.remove('d-none');
+      document.getElementById('serverErrors').innerText = 'Server error when updating. Try again.';
+    } finally {
+      submitBtn.disabled = false;
+      submitSpinner.classList.add('d-none');
+      document.getElementById('submitTxt').innerText = 'Update';
+    }
+  }
+
+  function clearErrors() {
+    ['firstNameError','lastNameError','emailError','phoneError','dobError','address1Error','cityError','postalCodeError','countryError','idNumberError','annualIncomeError','employmentStatusError','accountTypeError','initialDepositError','passwordError','passwordConfirmError','currentPasswordError','newPasswordError','confirmNewPasswordError'].forEach(id=>{
+      const el=document.getElementById(id);
+      if(el) el.innerText='';
+    });
+    document.getElementById('serverErrors').classList.add('d-none');
+    document.getElementById('serverErrors').innerText = '';
+  }
+
+  function showError(id,msg) {
+    const el = document.getElementById(id);
+    if (el) el.innerText = msg;
+    else alert(msg);
+  }
+
+  function handleServerError(message, body) {
+    // show structured server errors if available
+    const serverErrors = document.getElementById('serverErrors');
+    serverErrors.classList.remove('d-none');
+    serverErrors.innerText = message;
+    // if API returns field-level validation, you can map them here
+    if (body?.errors) {
+      // example: { errors: { email: 'invalid' } }
+      Object.entries(body.errors).forEach(([k,v])=>{
+        const id = (k === 'password') ? 'newPasswordError' : `${k}Error`;
+        const el = document.getElementById(id);
+        if (el) el.innerText = v;
+      });
+    }
+  }
+});
+
+
+  </script>
+</body>
+</html>
