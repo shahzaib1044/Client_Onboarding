@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create Account</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: "Segoe UI", sans-serif;
+      background: linear-gradient(to bottom right, #f0f4ff, #eef5ff);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      padding: 20px;
+    }
+
+    .card {
+      background: white;
+      width: 100%;
+      max-width: 450px;
+      border-radius: 16px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      padding: 30px;
+    }
+
+    .card-header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .icon {
+      width: 60px;
+      height: 60px;
+      background: #007bff;
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 10px;
+      font-size: 28px;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 26px;
+      font-weight: bold;
+    }
+
+    p {
+      color: #666;
+      font-size: 14px;
+      margin-top: 6px;
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 5px;
+      font-size: 14px;
+    }
+
+    input[type="email"],
+    input[type="password"] {
+      width: 100%;
+      height: 40px;
+      padding: 8px 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 14px;
+      margin-bottom: 6px;
+      box-sizing: border-box;
+    }
+
+    .radio-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .radio-option {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 10px;
+      cursor: pointer;
+    }
+
+    .radio-option:hover {
+      background-color: #f9f9f9;
+    }
+
+    button {
+      width: 100%;
+      height: 45px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      background: #9fc3ff;
+      cursor: not-allowed;
+    }
+
+    .footer-text {
+      text-align: center;
+      font-size: 14px;
+      color: #666;
+      margin-top: 15px;
+    }
+
+    .footer-text a {
+      color: #007bff;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .footer-text a:hover {
+      text-decoration: underline;
+    }
+
+    .field-error {
+      color: #dc3545;
+      font-size: 13px;
+      min-height: 18px;
+      margin-bottom: 6px;
+    }
+
+    /* Toast message */
+    .toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 12px 18px;
+      border-radius: 6px;
+      color: white;
+      font-size: 15px;
+      display: none;
+      animation: fadein 0.35s;
+      z-index: 9999;
+    }
+
+    .toast.success {
+      background-color: #28a745;
+    }
+
+    .toast.error {
+      background-color: #dc3545;
+    }
+
+    @keyframes fadein {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .server-error {
+      margin-top: 12px;
+      color: #b91c1c;
+      font-weight: 600;
+      display: none;
+    }
+
+    .success-box {
+      display: none;
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 8px;
+      background: #e6ffed;
+      color: #065f46;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="toast" id="toast"></div>
+
+  <div class="card" role="main">
+    <div class="card-header">
+      <div class="icon" aria-hidden="true">🏢</div>
+      <h2>Create Account</h2>
+      <p>Join our Client Onboarding platform</p>
+    </div>
+
+    <form id="registerForm" novalidate>
+      <label for="email">Email Address</label>
+      <input type="email" id="email" placeholder="you@example.com" required />
+      <div class="field-error" id="emailError"></div>
+
+      <label for="password">Password</label>
+      <input type="password" id="password" placeholder="••••••••" required />
+      <div class="field-error" id="passwordError"></div>
+
+      <label for="confirmPassword">Confirm Password</label>
+      <input type="password" id="confirmPassword" placeholder="••••••••" required />
+      <div class="field-error" id="confirmPasswordError"></div>
+
+      <label>Account Type</label>
+      <div class="radio-group" aria-label="Account Type">
+       
+
+        <label class="radio-option">
+          <input type="radio" name="role" value="EMPLOYEE"  checked/>
+          <div>
+            <div style="font-weight:700">Employee</div>
+            <div style="font-size:13px;color:#666;">Review and manage applications</div>
+          </div>
+        </label>
+      </div>
+      <div class="field-error" id="roleError"></div>
+
+      <button type="submit" id="registerBtn">Create Account</button>
+
+      <div class="server-error" id="serverError"></div>
+      <div class="success-box" id="successBox"></div>
+
+      <div class="footer-text">
+        Already have an account? <a href="login.html">Sign in</a>
+      </div>
+    </form>
+  </div>
+
+  <!-- Optional Bootstrap JS (not required, you included it previously) -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="" crossorigin="anonymous"></script>
+
+  <script>
+    // Simple, robust client-side validation + optional email uniqueness check
+    (function () {
+      const form = document.getElementById('registerForm');
+      const emailEl = document.getElementById('email');
+      const passwordEl = document.getElementById('password');
+      const confirmEl = document.getElementById('confirmPassword');
+      const registerBtn = document.getElementById('registerBtn');
+      const serverError = document.getElementById('serverError');
+      const successBox = document.getElementById('successBox');
+      const toast = document.getElementById('toast');
+
+      const emailError = document.getElementById('emailError');
+      const passwordError = document.getElementById('passwordError');
+      const confirmError = document.getElementById('confirmPasswordError');
+      const roleError = document.getElementById('roleError');
+
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+      let validity = {
+        email: false,
+        password: false,
+        confirm: false,
+        role: true
+      };
+
+      function showToast(message, type = 'success', ms = 3000) {
+        toast.textContent = message;
+        toast.className = 'toast ' + (type === 'success' ? 'success' : 'error');
+        toast.style.display = 'block';
+        setTimeout(() => { toast.style.display = 'none'; }, ms);
+      }
+
+      function setBtnState() {
+        const allValid = validity.email && validity.password && validity.confirm && validity.role;
+        registerBtn.disabled = !allValid;
+      }
+
+      // Basic validators
+      emailEl.addEventListener('blur', async () => {
+        const v = emailEl.value.trim();
+        if (!v) {
+          emailError.textContent = 'Email is required';
+          validity.email = false;
+          setBtnState();
+          return;
+        }
+        if (!emailRegex.test(v)) {
+          emailError.textContent = 'Invalid email format';
+          validity.email = false;
+          setBtnState();
+          return;
+        }
+        emailError.textContent = '';
+
+        // Optional: check uniqueness (comment out if you don't have endpoint)
+        try {
+          // Replace URL with your endpoint if necessary
+          const resp = await fetch(`https://client-onboarding-9xa0jb4pn-shahzaib1044s-projects.vercel.app/api/auth/check-email?email=${encodeURIComponent(v)}`);
+          if (resp.ok) {
+            const json = await resp.json();
+            if (json.exists) {
+              emailError.textContent = 'Email already in use';
+              validity.email = false;
+            } else {
+              // helpful confirmation (not necessary)
+              emailError.textContent = '';
+              validity.email = true;
+            }
+          } else {
+            // server returned non-2xx but we still allow progress (server will validate on submit)
+            validity.email = true;
+          }
+        } catch (err) {
+          // network error — allow submit but server-side must validate
+          validity.email = true;
+        }
+        setBtnState();
+      });
+
+      passwordEl.addEventListener('blur', () => {
+        const pw = passwordEl.value;
+        const rules = [];
+        if (pw.length < 8) rules.push('min 8 chars');
+        if (!/[A-Z]/.test(pw)) rules.push('one uppercase');
+        if (!/[a-z]/.test(pw)) rules.push('one lowercase');
+        if (!/[0-9]/.test(pw)) rules.push('one number');
+        if (!/[^A-Za-z0-9]/.test(pw)) rules.push('one special char');
+        if (rules.length) {
+          passwordError.textContent = 'Password requires: ' + rules.join(', ');
+          validity.password = false;
+        } else {
+          passwordError.textContent = '';
+          validity.password = true;
+        }
+        // also re-check confirm
+        checkConfirm();
+        setBtnState();
+      });
+
+      function checkConfirm() {
+        if (confirmEl.value !== passwordEl.value) {
+          confirmError.textContent = 'Passwords do not match';
+          validity.confirm = false;
+        } else {
+          confirmError.textContent = '';
+          // confirm only valid if password itself is valid
+          validity.confirm = validity.password && (confirmEl.value.length > 0);
+        }
+      }
+
+      confirmEl.addEventListener('blur', () => {
+        checkConfirm();
+        setBtnState();
+      });
+
+      // role validation (should always be present because one is checked by default)
+      function validateRole() {
+        const role = document.querySelector('input[name="role"]:checked');
+        if (!role) {
+          roleError.textContent = 'Select an account type';
+          validity.role = false;
+        } else {
+          roleError.textContent = '';
+          validity.role = true;
+        }
+        setBtnState();
+      }
+
+      document.querySelectorAll('input[name="role"]').forEach(r => {
+        r.addEventListener('change', validateRole);
+      });
+
+      // Initialize button disabled
+      setBtnState();
+
+      // Submit handler
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        serverError.style.display = 'none';
+        successBox.style.display = 'none';
+
+        // trigger validations
+        emailEl.dispatchEvent(new Event('blur'));
+        passwordEl.dispatchEvent(new Event('blur'));
+        confirmEl.dispatchEvent(new Event('blur'));
+        validateRole();
+
+        if (!validity.email || !validity.password || !validity.confirm || !validity.role) {
+          serverError.textContent = 'Please fix the errors above before submitting.';
+          serverError.style.display = 'block';
+          return;
+        }
+
+        // Prepare payload
+       const selectedRole = document.querySelector('input[name="role"]:checked')?.value || 'EMPLOYEE';
+const payload = {
+  email: emailEl.value.trim(),
+  password: passwordEl.value,
+  role: selectedRole,
+  accountType: selectedRole   // <- add this line
+};
+
+
+        // UI: submitting
+        registerBtn.disabled = true;
+        registerBtn.textContent = 'Registering...';
+
+        try {
+          const res = await fetch('https://client-onboarding-9xa0jb4pn-shahzaib1044s-projects.vercel.app/api/auth/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+
+          const body = await res.json().catch(() => ({}));
+
+          if (res.ok) {
+            // success
+            showToast('Registration successful — check your email', 'success', 3500);
+            successBox.innerHTML = `Registration successful! Reference: <strong>${generateReference()}</strong>`;
+            successBox.style.display = 'block';
+            // optionally redirect after short delay
+            setTimeout(() => { window.location.href = 'login.html'; }, 2000);
+          } else {
+            // show server errors cleanly
+            if (body && body.errors && typeof body.errors === 'object') {
+              // map field errors to inputs if possible
+              if (body.errors.email) emailError.textContent = body.errors.email;
+              serverError.textContent = 'Please correct the highlighted errors.';
+            } else if (body && body.error) {
+              serverError.textContent = body.error;
+            } else if (body && body.message) {
+              serverError.textContent = body.message;
+            } else {
+              serverError.textContent = 'Registration failed. Please try again.';
+            }
+            serverError.style.display = 'block';
+            showToast('Registration failed', 'error', 2500);
+          }
+        } catch (err) {
+          serverError.textContent = 'Network error: ' + (err.message || err);
+          serverError.style.display = 'block';
+          showToast('Network error', 'error', 2500);
+        } finally {
+          registerBtn.disabled = false;
+          registerBtn.textContent = 'Create Account';
+        }
+      });
+
+      // small utility for a reference
+      function generateReference() {
+        const now = Date.now().toString(36).toUpperCase().slice(-6);
+        const rand = Math.floor(Math.random() * 9000 + 1000).toString();
+        return `APP-${now}-${rand}`;
+      }
+    })();
+  </script>
+</body>
+</html>

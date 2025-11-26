@@ -1,0 +1,701 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Review Management</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" defer></script>
+
+  <style>
+    :root{--brand:#0d6efd;--muted:#6c757d;--card-radius:14px}
+    html,body{height:100%}
+    body{background:linear-gradient(180deg,#f7fbff 0%,#ffffff 70%);font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial;color:#0f1724}
+
+    /* Navbar */
+    .navbar{background:transparent}
+    .brand-bubble{width:46px;height:46px;border-radius:12px;background:linear-gradient(135deg,var(--brand),#6fa8ff);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700}
+
+    /* layout */
+    .sidebar{min-width:220px;max-width:260px;padding:1rem;border-radius:var(--card-radius);background:linear-gradient(180deg,rgba(13,110,253,0.04),rgba(13,110,253,0.02));height:100%}
+    .sidebar .nav-link{color:var(--muted)}
+    .sidebar .nav-link.active{color:var(--brand);font-weight:600}
+
+    .card-rounded{border-radius:var(--card-radius);box-shadow:0 8px 30px rgba(16,24,40,0.04)}
+    .stat-card{border-radius:12px;padding:1rem}
+
+    /* table */
+    .table thead th{border-bottom:0;color:#556070}
+    .table tbody tr{background:#fff;border-radius:10px;margin-bottom:12px;box-shadow:0 6px 18px rgba(12,23,40,0.03)}
+    .table{border-collapse:separate;border-spacing:0 12px}
+    .table td,.table th{vertical-align:middle;border:0;padding:1rem}
+    /* avatar */
+    .avatar {
+      width: 46px; height: 46px; border-radius: 12px; font-size: 1.1rem; font-weight:700;
+      color:#fff; display:flex; align-items:center; justify-content:center;
+      background: linear-gradient(135deg,var(--brand),#6fa8ff);
+    }
+
+    .muted { color: var(--muted); }
+    .small-input { height: 32px; padding: 4px 8px; }
+
+    /* table */
+    .table { border-collapse: separate; border-spacing: 0 12px; }
+    .table tbody tr { background: #fff; border-radius: 14px; box-shadow: 0 4px 16px rgba(0,0,0,0.04); }
+    .table td, .table th { border: none; padding: 14px; vertical-align: middle; }
+
+    /* nav links */
+    .nav-link { padding: .6rem .75rem; border-radius: 8px; color: #333; font-weight: 500; }
+    .nav-link.active { background: rgba(13,110,253,.1); color: var(--brand); font-weight: 600; }
+    .nav-link:hover { background: rgba(13,110,253,.08); }
+
+    /* badges */
+    .badge-overdue { background: #f8d7da; color: #7a1a1a; padding: .4rem .65rem; border-radius: 6px; }
+    .badge-upcoming { background: #fff4e5; color: #664d03; padding: .4rem .65rem; border-radius: 6px; }
+
+    /* review rules inside sidebar */
+    .review-rules .fw-bold { font-size: 1rem; }
+    .review-rules .muted { line-height: 1.5; }
+
+    /* responsive */
+    @media (max-width: 991px) {
+      .container-fluid { padding-left: 1rem; padding-right: 1rem; }
+      .sidebar { min-height: auto; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="navbar navbar-expand-lg mb-4 px-4">
+    <div class="container-fluid">
+      <div class="d-flex align-items-center gap-3">
+        <!-- mobile sidebar toggle -->
+        <button class="btn btn-outline-secondary d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileSidebar" aria-controls="mobileSidebar">
+          <i class="bi bi-list"></i>
+        </button>
+
+        <a class="navbar-brand d-flex align-items-center gap-3" href="#">
+          <div class="brand-bubble">CO</div>
+          <div>
+            <div class="fw-bold">Client Onboarding</div>
+            <small class="muted">Employee Portal</small>
+          </div>
+        </a>
+      </div>
+
+      <div class="d-flex align-items-center ms-auto gap-3">
+        <div class="text-end d-none d-md-block">
+          <div id="userEmail" class="fw-semibold">user@example.com</div>
+          <small class="muted" id="userRole">Employee</small>
+        </div>
+        <button id="logoutBtn" class="btn btn-outline-danger btn-sm">Logout</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- mobile offcanvas sidebar -->
+  <div class="offcanvas offcanvas-start" tabindex="-1" id="mobileSidebar" aria-labelledby="mobileSidebarLabel">
+    <div class="offcanvas-header">
+      <h5 class="offcanvas-title" id="mobileSidebarLabel">Menu</h5>
+      <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+      <aside class="p-0">
+        <div class="d-flex align-items-center mb-3 gap-3">
+          <div class="avatar">S</div>
+          <div>
+            <div id=userName1 class="fw-bold"></div>
+            <small class="muted">Product & Support</small>
+          </div>
+        </div>
+
+        <nav class="nav flex-column mb-3">
+          <a class="nav-link " href="Dashboard.html"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a>
+          
+          <a class="nav-link" href="Review.html"><i class="bi bi-gear me-2"></i>Review</a>
+          <a class="nav-link" href="Statistics.html"><i class="bi bi-graph-up me-2"></i>Statistics</a>
+        </nav>
+
+        <hr />
+
+        <div>
+          <small class="text-uppercase muted">Quick filters</small>
+          <div class="d-flex flex-column gap-2 mt-2">
+            <button class="btn btn-sm btn-outline-primary text-start">All Customers</button>
+            <button class="btn btn-sm btn-outline-success text-start">Approved <span class="badge bg-success ms-2">142</span></button>
+            <button class="btn btn-sm btn-outline-warning text-start">Pending <span class="badge bg-warning text-dark ms-2">18</span></button>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <!-- MAIN LAYOUT -->
+  <div class="container-fluid">
+    <div class="row g-4">
+      <!-- SIDEBAR (desktop) -->
+      <div class="col-12 col-lg-3 d-none d-lg-block">
+        <aside class="sidebar card-rounded p-3 shadow-sm">
+          <div class="d-flex align-items-center mb-3 gap-3">
+            <div class="avatar">S</div>
+            <div>
+              <div id="userName" class="fw-bold">EM</div>
+              <small class="muted">Product & Support</small>
+            </div>
+          </div>
+
+          <nav class="nav flex-column mb-3">
+            <a class="nav-link " href="Dashboard.html"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a>
+            <a class="nav-link active" href="Review.html"><i class="bi bi-gear me-2"></i>Review</a>
+            <a class="nav-link" href="Statistics.html"><i class="bi bi-graph-up me-2"></i>Statistics</a>
+          </nav>
+
+          <hr />
+
+          <!-- REVIEW RULES (inside sidebar) -->
+          <div class="review-rules mt-3">
+            <div class="fw-bold mb-2">Review Rules</div>
+            <div class="muted small mb-2">
+              • Default frequency: 6 months<br />
+              • Auto-schedule on approval<br />
+              • Manual override allowed
+            </div>
+            <div>
+              <button class="btn btn-sm btn-primary w-100" id="btnScheduler">Run Scheduler (dev)</button>
+            </div>
+          </div>
+
+          <!-- optional extra items -->
+          <div class="d-flex flex-column gap-2 mt-3">
+            <!-- additional sidebar items here -->
+          </div>
+        </aside>
+      </div>
+
+      <!-- MAIN CONTENT -->
+      <div class="col-12 col-lg-9">
+        <!-- top header card -->
+        <div class="card p-3 card-rounded mb-3">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h5 class="mb-0">Reviews</h5>
+              <small class="muted">Upcoming and overdue reviews</small>
+            </div>
+            <div>
+              <div class="btn-group" role="group">
+                <button class="btn btn-outline-primary" id="tabUpcoming">Upcoming</button>
+                <button class="btn btn-outline-secondary" id="tabOverdue">Overdue</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- filters + table card -->
+        <div class="card card-rounded p-0">
+          <div class="p-3 border-bottom d-flex flex-wrap justify-content-between align-items-center gap-2">
+            <div class="fw-bold" id="tableTitle">Upcoming Reviews</div>
+
+            <div class="muted small d-flex align-items-center gap-2">
+              <label class="mb-0 small">From</label>
+              <input type="date" id="filterFrom" class="form-control form-control-sm small-input" />
+              <label class="mb-0 small">To</label>
+              <input type="date" id="filterTo" class="form-control form-control-sm small-input" />
+              <select id="presetDays" class="form-select form-select-sm" style="width:120px">
+                <option value="">Preset</option>
+                <option value="7">Next 7d</option>
+                <option value="30">Next 30d</option>
+                <option value="365" selected>Next 365d</option>
+              </select>
+              <button id="applyFilterBtn" class="btn btn-sm btn-primary">Apply</button>
+              <div id="loadingSpinner" class="spinner-border spinner-border-sm text-primary ms-2 d-none" role="status"></div>
+            </div>
+          </div>
+
+          <div class="table-responsive p-3">
+            <table class="table" id="reviewsTable">
+              <thead>
+                <tr class="muted small">
+                  <th>Customer Name</th>
+                  <th>Last Review</th>
+                  <th>Next Review</th>
+                  <th>Days</th>
+                  <th class="text-end">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="reviewsTbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div> <!-- /.col main -->
+    </div> <!-- /.row -->
+  </div> <!-- /.container-fluid -->
+
+  <!-- Complete Review Modal -->
+  <div class="modal fade" id="completeModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Complete Review</h5>
+          <button class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <form id="completeForm">
+            <input type="hidden" id="completeReviewId" />
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">Review Date</label>
+                <input type="date" id="reviewDate" class="form-control" />
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Next Review Date</label>
+                <input type="date" id="nextReviewDate" class="form-control" />
+              </div>
+              <div class="col-12">
+                <label class="form-label">Notes</label>
+                <textarea id="reviewNotes" class="form-control" rows="4" placeholder="Optional notes..."></textarea>
+              </div>
+            </div>
+          </form>
+          <div id="completeError" class="text-danger mt-2 d-none"></div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button class="btn btn-success" id="confirmCompleteBtn">Complete & Schedule Next</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+<script>
+(() => {
+  const API_BASE = 'https://client-onboarding-9xa0jb4pn-shahzaib1044s-projects.vercel.app';
+ 
+  let currentTab = 'upcoming';
+  let currentList = [];
+ const TOKEN_KEY = 'token';
+  const SESSION_KEY = 'loginTime';
+  const MAX_SESSION_DURATION = 30 * 60 * 1000; // 30 min
+  function getToken(){return localStorage.getItem(TOKEN_KEY)}
+  // DOM elements
+  const reviewsTbody = document.getElementById('reviewsTbody');
+  const reviewCountEl = document.getElementById('reviewCount') || (() => {
+    // create small display if missing
+    const span = document.createElement('span');
+    span.id = 'reviewCount';
+    return span;
+  })();
+  const tableTitle = document.getElementById('tableTitle');
+  const applyFilterBtn = document.getElementById('applyFilterBtn');
+  const filterFrom = document.getElementById('filterFrom');
+  const filterTo = document.getElementById('filterTo');
+  const presetDays = document.getElementById('presetDays');
+  const loadingSpinner = document.getElementById('loadingSpinner');
+
+  // page controls
+  document.getElementById('tabUpcoming').addEventListener('click', ()=>loadTab('upcoming', true));
+  document.getElementById('tabOverdue').addEventListener('click', ()=>loadTab('overdue', true));
+  document.getElementById('btnScheduler').addEventListener('click', runScheduler);
+  document.getElementById('confirmCompleteBtn').addEventListener('click', confirmComplete);
+  applyFilterBtn.addEventListener('click', ()=>loadTab(currentTab, true));
+  presetDays.addEventListener('change', onPresetChange);
+
+const userNameEl = document.getElementById("userName");
+   const userNameE2 = document.getElementById("userName1");
+
+const token = getToken();
+
+  async function apiFetch(endpoint, options = {}){
+    const token = getToken();
+    const loginTime = localStorage.getItem(SESSION_KEY);
+
+    if (!token || !loginTime || Date.now() - loginTime > MAX_SESSION_DURATION) {
+      alert('Session expired. Please log in again.');
+      window.location.reload();
+      return;
+    }
+
+    localStorage.setItem(SESSION_KEY, Date.now());
+
+    const res = await fetch(`${API_BASE}${endpoint}`, {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(options.headers || {}),
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    if (!res.ok) {
+      const error = await res.json().catch(() => ({}));
+      throw new Error(error.message || 'API request failed');
+    }
+
+    return res.json();
+  }
+  /* ========= Logout ========= */
+async function logout() {
+  // remove token + session data
+  localStorage.removeItem(TOKEN_KEY);
+  localStorage.removeItem(SESSION_KEY);
+  localStorage.removeItem('userId');
+  window.location.href = 'login.html';
+}
+  const userEmailEl = document.getElementById('userEmail');
+const payload = JSON.parse(atob(token.split('.')[1]));
+    userEmailEl.textContent = payload.email
+    const username = payload.email ? payload.email.split('@')[0] : '';
+    
+   userNameEl.textContent = username
+   userNameE2.textContent = username
+  function onPresetChange(){
+    const days = presetDays.value;
+    if (!days) return;
+    // compute from = today (UTC), to = today + days
+    const now = new Date();
+    const todayUtc = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+    const toUtc = new Date(todayUtc.getTime() + parseInt(days,10) * 24 * 60 * 60 * 1000);
+    filterFrom.value = todayUtc.toISOString().slice(0,10);
+    filterTo.value = toUtc.toISOString().slice(0,10);
+  }
+
+  // parse YYYY-MM-DD as UTC midnight (no local timezone shift)
+  function parseISODateAsUTC(isoDate) {
+    if (!isoDate) return null;
+    return new Date(isoDate + 'T00:00:00Z');
+  }
+
+  // returns integer days difference (target - today), using UTC midnights
+  function daysDiffFromToday(iso) {
+    const d = parseISODateAsUTC(iso);
+    if (!d) return NaN;
+    const now = new Date();
+    const todayUtc = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+    const msPerDay = 24 * 60 * 60 * 1000;
+    return Math.round((d - todayUtc) / msPerDay);
+  }
+
+  function createBadge(days) {
+    const span = document.createElement('span');
+    if (Number.isNaN(days)) {
+      span.className = 'muted';
+      span.textContent = '-';
+    } else if (days < 0) {
+      span.className = 'badge-overdue';
+      span.textContent = Math.abs(days) + 'd';
+    } else {
+      span.className = 'badge-upcoming';
+      span.textContent = days + 'd';
+    }
+    return span;
+  }
+
+  // Render a single row safely (no innerHTML with DB data)
+  function renderRow(r){
+    const tr = document.createElement('tr');
+    const days = daysDiffFromToday(r.scheduled_date);
+    const firstName = r.customer && r.customer.first_name ? r.customer.first_name : '';
+    const lastName = r.customer && r.customer.last_name ? r.customer.last_name : '';
+    const custName = (firstName || lastName) ? `${firstName} ${lastName}`.trim() : (r.customer_id || 'N/A');
+
+    // columns
+    const tdName = document.createElement('td');
+    tdName.textContent = custName;
+
+    const tdLast = document.createElement('td');
+    tdLast.textContent = r.completed_date || '-';
+
+    const tdNext = document.createElement('td');
+    tdNext.textContent = r.scheduled_date || (r.next_review_date || '-');
+
+    const tdDays = document.createElement('td');
+    tdDays.appendChild(createBadge(days));
+
+    const tdActions = document.createElement('td');
+    tdActions.className = 'text-end';
+    const btn = document.createElement('button');
+    btn.className = 'btn btn-sm btn-success complete-review';
+    btn.dataset.reviewId = r.id;
+    btn.textContent = 'Complete';
+    tdActions.appendChild(btn);
+
+    tr.appendChild(tdName);
+    tr.appendChild(tdLast);
+    tr.appendChild(tdNext);
+    tr.appendChild(tdDays);
+    tr.appendChild(tdActions);
+
+    return tr;
+  }
+
+  function renderList(list){
+    reviewsTbody.innerHTML = '';
+    if (!list || list.length === 0) {
+      reviewsTbody.innerHTML = '<tr><td colspan="5">No reviews found.</td></tr>';
+      if (reviewCountEl) reviewCountEl.textContent = '0';
+      currentList = [];
+      return;
+    }
+    list.forEach(r => reviewsTbody.appendChild(renderRow(r)));
+    if (reviewCountEl) reviewCountEl.textContent = String(list.length);
+    currentList = list;
+    // attach handlers
+    document.querySelectorAll('.complete-review').forEach(b => {
+      b.addEventListener('click', e => openCompleteModal(e.currentTarget.dataset.reviewId));
+    });
+  }
+
+  // Helper: builds query params for upcoming endpoint
+  function buildUpcomingParams(useFilters) {
+    const params = new URLSearchParams();
+    if (useFilters) {
+      const f = filterFrom.value;
+      const t = filterTo.value;
+      if (f) params.set('from', f);
+      if (t) params.set('to', t);
+      // optionally you could allow status override:
+      // params.set('status', 'SCHEDULED');
+    } else {
+      // default to 30 days
+      params.set('days', '365');
+    }
+    return params.toString();
+  }
+
+  async function loadTab(tab, useFilters = false){
+  currentTab = tab;
+  tableTitle.textContent = tab === 'upcoming' ? 'Upcoming Reviews' : 'Overdue Reviews';
+  const token = localStorage.getItem(TOKEN_KEY);
+
+  // Build query only if filters are being applied
+  let query = '';
+  if (useFilters) {
+    const params = new URLSearchParams();
+    if (filterFrom.value) params.set('from', filterFrom.value);
+    if (filterTo.value) params.set('to', filterTo.value);
+    query = params.toString();
+  }
+
+  applyFilterBtn.disabled = true;
+  loadingSpinner.classList.remove('d-none');
+
+  try {
+    const url = query ? `${API_BASE}/api/reviews/upcoming?${query}` : `${API_BASE}/api/reviews/upcoming`;
+    const res = await fetch(url, {
+      headers: token ? { 'Authorization': 'Bearer ' + token } : {}
+    });
+    if (!res.ok) throw new Error('Failed to fetch reviews');
+
+    const json = await res.json();
+    let reviews = json.reviews || [];
+
+    // If 'Overdue' tab, filter client-side
+    if (tab === 'overdue') {
+      const todayUTC = new Date();
+      todayUTC.setUTCHours(0,0,0,0);
+      reviews = reviews.filter(r => r.scheduled_date && new Date(r.scheduled_date+'T00:00:00Z') < todayUTC);
+    }
+
+    renderList(reviews);
+  } catch (e) {
+    console.error('loadTab error', e);
+    reviewsTbody.innerHTML = '<tr><td colspan="5">Failed to load reviews.</td></tr>';
+    reviewCountEl.textContent = '0';
+  } finally {
+    applyFilterBtn.disabled = false;
+    loadingSpinner.classList.add('d-none');
+  }
+}
+
+// Initial load: display all reviews
+loadTab('upcoming', false);
+/* ========= Logout ========= */
+async function logout() {
+  // remove token + session data
+  localStorage.removeItem(TOKEN_KEY);
+  localStorage.removeItem(SESSION_KEY);
+  localStorage.removeItem('userId');
+  window.location.href = 'login.html';
+}
+logoutBtn.addEventListener('click', logout);
+
+ async function openCompleteModal(reviewId){
+  document.getElementById('completeReviewId').value = reviewId;
+  
+  // Find the review object
+  const review = currentList.find(r => r.id == reviewId);
+  if (!review) return;
+
+  const today = new Date().toISOString().slice(0,10);
+  document.getElementById('reviewDate').value = today;
+  document.getElementById('nextReviewDate').value = addMonthsISO(today, 6);
+  document.getElementById('reviewNotes').value = '';
+
+  const token = localStorage.getItem(TOKEN_KEY);
+
+  try {
+    // Fetch customer details
+    const customerRes = await fetch(`${API_BASE}/api/customers/${review.customer_id}`, {
+      headers: token ? { 'Authorization': 'Bearer ' + token } : {}
+    });
+    const customer = await customerRes.json();
+    populateCustomerInfo(customer);
+
+    // Fetch past reviews notes
+    const pastRes = await fetch(`${API_BASE}/api/reviews/customer/${review.customer_id}`, {
+      headers: token ? { 'Authorization': 'Bearer ' + token } : {}
+    });
+    const pastData = await pastRes.json();
+    populatePastNotes(pastData.pastReviews || []);
+
+  } catch (err) {
+    console.error('Error fetching customer/past notes:', err);
+  }
+
+  // Show modal
+  new bootstrap.Modal(document.getElementById('completeModal')).show();
+}
+function populatePastNotes(reviews) {
+  let container = document.getElementById('pastNotes');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'pastNotes';
+    container.className = 'mb-3 p-2 border rounded';
+    document.querySelector('#completeModal .modal-body').append(container);
+  }
+
+  if (reviews.length === 0) {
+    container.innerHTML = '<p class="muted">No past notes available.</p>';
+    return;
+  }
+
+  let html = '<h6>Past Notes</h6>';
+  html += '<ul class="list-group">';
+  reviews.forEach(r => {
+    html += `<li class="list-group-item">
+               <strong>${r.completed_date || r.scheduled_date}:</strong> ${r.notes || '-'}
+             </li>`;
+  });
+  html += '</ul>';
+  container.innerHTML = html;
+}
+
+function populateCustomerInfo(customer) {
+  // Create a section in your modal to show customer details (if not already present)
+  let container = document.getElementById('customerInfo');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'customerInfo';
+    container.className = 'mb-3 p-2 border rounded';
+    document.querySelector('#completeModal .modal-body').prepend(container);
+  }
+
+  container.innerHTML = `
+    <h6>Customer Info</h6>
+    <p><strong>Name:</strong> ${customer.customerName}</p>
+    <p><strong>Email:</strong> ${customer.email}</p>
+    <p><strong>Status:</strong> ${customer.status}</p>
+    <p><strong>Phone:</strong> ${customer.phone || '-'}</p>
+    <p><strong>Address:</strong> ${customer.address_line1 || '-'}, ${customer.city || '-'}, ${customer.postal_code || '-'}, ${customer.country || '-'}</p>
+    <p><strong>Annual Income:</strong> ${customer.annual_income || '-'}</p>
+    <p><strong>Account Type:</strong> ${customer.account_type || '-'}</p>
+    <p><strong>Risk Score:</strong> ${customer.risk_score ?? '-'} (${customer.risk_level ?? '-'})</p>
+  `;
+}
+
+
+  // safer addMonthsISO handling month overflow, retaining UTC behavior
+  function addMonthsISO(isoDate, months) {
+    const [y, m, d] = isoDate.split('-').map(Number);
+    const date = new Date(Date.UTC(y, m - 1, d));
+    const targetMonthStart = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + months, 1));
+    const lastDay = new Date(Date.UTC(targetMonthStart.getUTCFullYear(), targetMonthStart.getUTCMonth() + 1, 0)).getUTCDate();
+    const day = Math.min(d, lastDay);
+    targetMonthStart.setUTCDate(day);
+    return targetMonthStart.toISOString().slice(0,10);
+  }
+
+  async function confirmComplete(){
+    const btn = document.getElementById('confirmCompleteBtn');
+    btn.disabled = true;
+    const errEl = document.getElementById('completeError');
+
+    const reviewId = document.getElementById('completeReviewId').value;
+    const completedDate = document.getElementById('reviewDate').value;
+    const nextReviewDate = document.getElementById('nextReviewDate').value;
+    const notes = document.getElementById('reviewNotes').value.trim();
+    const token = localStorage.getItem(TOKEN_KEY);
+
+    // basic client validation
+    if (!completedDate) {
+      if (errEl) { errEl.textContent = 'Please select a review date.'; errEl.classList.remove('d-none'); }
+      btn.disabled = false;
+      return;
+    }
+    if (nextReviewDate && (new Date(nextReviewDate) < new Date(completedDate))) {
+      if (errEl) { errEl.textContent = 'Next review date must be after or equal to review date.'; errEl.classList.remove('d-none'); }
+      btn.disabled = false;
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API_BASE}/api/reviews/${encodeURIComponent(reviewId)}/complete`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': 'Bearer ' + token } : {})
+        },
+        body: JSON.stringify({ completedDate, notes, nextReviewDate })
+      });
+      if (!res.ok) {
+        const txt = await res.text();
+        throw new Error(txt || 'Failed to complete');
+      }
+      // success: close modal & reload current view (respect filters if set)
+      bootstrap.Modal.getInstance(document.getElementById('completeModal')).hide();
+      loadTab(currentTab, Boolean(filterFrom.value || filterTo.value));
+    } catch (e) {
+      console.error('confirmComplete error', e);
+      if (errEl) { errEl.textContent = 'Failed to complete review.'; errEl.classList.remove('d-none'); }
+      else alert('Failed to complete review');
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  async function runScheduler(){
+    const token = localStorage.getItem(TOKEN_KEY);
+    const btn = document.getElementById('btnScheduler');
+    btn.disabled = true;
+    try {
+      const res = await fetch(`${API_BASE}/api/reviews/admin/run-review-scheduler`, {
+        method: 'POST',
+        headers: token ? { 'Authorization': 'Bearer ' + token } : {}
+      });
+      if (!res.ok) {
+        const txt = await res.text();
+        throw new Error(txt || 'Scheduler failed');
+      }
+      const json = await res.json();
+      const createdCount = Array.isArray(json.created) ? json.created.length : (json.created ? 1 : 0);
+      alert('Scheduler created ' + createdCount + ' reviews');
+      // reload current view
+      loadTab(currentTab, Boolean(filterFrom.value || filterTo.value));
+    } catch (err) {
+      console.error('runScheduler', err);
+      alert('Scheduler run failed');
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  // initial load: set default preset and load list
+  onPresetChange();
+  loadTab('upcoming', true);
+})();
+</script>
+</body>
+</html>

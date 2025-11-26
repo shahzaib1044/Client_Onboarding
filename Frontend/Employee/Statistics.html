@@ -1,0 +1,473 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Statistics - Review Management</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <style>
+   :root{--brand:#0d6efd;--muted:#6c757d;--card-radius:14px}
+    html,body{height:100%}
+    body{background:linear-gradient(180deg,#f7fbff 0%,#ffffff 70%);font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial;color:#0f1724}
+
+    /* Navbar */
+    .navbar{background:transparent}
+    .brand-bubble{width:46px;height:46px;border-radius:12px;background:linear-gradient(135deg,var(--brand),#6fa8ff);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700}
+
+    /* layout */
+    .sidebar{min-width:220px;max-width:260px;padding:1rem;border-radius:var(--card-radius);background:linear-gradient(180deg,rgba(13,110,253,0.04),rgba(13,110,253,0.02));height:100%}
+    .sidebar .nav-link{color:var(--muted)}
+    .sidebar .nav-link.active{color:var(--brand);font-weight:600}
+
+    .card-rounded{border-radius:var(--card-radius);box-shadow:0 8px 30px rgba(16,24,40,0.04)}
+    .stat-card{border-radius:12px;padding:1rem}
+
+    /* table */
+    .table thead th{border-bottom:0;color:#556070}
+    .table tbody tr{background:#fff;border-radius:10px;margin-bottom:12px;box-shadow:0 6px 18px rgba(12,23,40,0.03)}
+    .table{border-collapse:separate;border-spacing:0 12px}
+    .table td,.table th{vertical-align:middle;border:0;padding:1rem}
+
+    /* navbar */
+    .navbar { background: #fff; border-bottom: 1px solid rgba(0,0,0,0.08); }
+    .brand-bubble {
+      background: linear-gradient(135deg, var(--brand), #6fa8ff);
+      color: #fff; width: 44px; height: 44px; border-radius: 10px;
+      display:flex; align-items:center; justify-content:center; font-weight:700;
+    }
+
+    /* avatar */
+    .avatar {
+      width: 46px; height: 46px; border-radius: 12px; font-size: 1.1rem; font-weight:700;
+      color:#fff; display:flex; align-items:center; justify-content:center;
+      background: linear-gradient(135deg,var(--brand),#6fa8ff);
+    }
+
+    .muted { color: var(--muted); }
+    .small-input { height: 32px; padding: 4px 8px; }
+
+    /* table */
+    .table { border-collapse: separate; border-spacing: 0 12px; }
+    .table tbody tr { background: #fff; border-radius: 14px; box-shadow: 0 4px 16px rgba(0,0,0,0.04); }
+    .table td, .table th { border: none; padding: 14px; vertical-align: middle; }
+
+    /* nav links */
+    .nav-link { padding: .6rem .75rem; border-radius: 8px; color: #333; font-weight: 500; }
+    .nav-link.active { background: rgba(13,110,253,.1); color: var(--brand); font-weight: 600; }
+    .nav-link:hover { background: rgba(13,110,253,.08); }
+
+    /* badges */
+    .badge-overdue { background: #f8d7da; color: #7a1a1a; padding: .4rem .65rem; border-radius: 6px; }
+    .badge-upcoming { background: #fff4e5; color: #664d03; padding: .4rem .65rem; border-radius: 6px; }
+
+    /* review rules inside sidebar */
+    .review-rules .fw-bold { font-size: 1rem; }
+    .review-rules .muted { line-height: 1.5; }
+
+    /* responsive */
+    @media (max-width: 991px) {
+      .container-fluid { padding-left: 1rem; padding-right: 1rem; }
+      .sidebar { min-height: auto; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="navbar navbar-expand-lg mb-4 px-4">
+    <div class="container-fluid">
+      <div class="d-flex align-items-center gap-3">
+        <!-- mobile sidebar toggle -->
+        <button class="btn btn-outline-secondary d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileSidebar" aria-controls="mobileSidebar">
+          <i class="bi bi-list"></i>
+        </button>
+
+        <a class="navbar-brand d-flex align-items-center gap-3" href="#">
+          <div class="brand-bubble">CO</div>
+          <div>
+            <div class="fw-bold">Client Onboarding</div>
+            <small class="muted">Employee Portal</small>
+          </div>
+        </a>
+      </div>
+
+      <div class="d-flex align-items-center ms-auto gap-3">
+        <div class="text-end d-none d-md-block">
+          <div id="userEmail" class="fw-semibold">user@example.com</div>
+          <small class="muted" id="userRole">Employee</small>
+        </div>
+        <button id="logoutBtn" class="btn btn-outline-danger btn-sm">Logout</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- mobile offcanvas sidebar -->
+  <div class="offcanvas offcanvas-start" tabindex="-1" id="mobileSidebar" aria-labelledby="mobileSidebarLabel">
+    <div class="offcanvas-header">
+      <h5 class="offcanvas-title" id="mobileSidebarLabel">Menu</h5>
+      <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+      <aside class="p-0">
+        <div class="d-flex align-items-center mb-3 gap-3">
+          <div class="avatar">S</div>
+          <div>
+            <div id="userName1" class="fw-bold">EM</div>
+            <small class="muted">Product & Support</small>
+          </div>
+        </div>
+
+        <nav class="nav flex-column mb-3">
+          <a class="nav-link " href="Dashboard.html"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a>
+          <a class="nav-link" href="Review.html"><i class="bi bi-gear me-2"></i>Review</a>
+          <a class="nav-link active" href="Statistics.html"><i class="bi bi-graph-up me-2"></i>Statistics</a>
+        </nav>
+
+        <hr />
+
+        <div>
+          <small class="text-uppercase muted">Quick filters</small>
+          <div class="d-flex flex-column gap-2 mt-2">
+            <button class="btn btn-sm btn-outline-primary text-start">All Customers</button>
+            <button class="btn btn-sm btn-outline-success text-start">Approved <span class="badge bg-success ms-2">142</span></button>
+            <button class="btn btn-sm btn-outline-warning text-start">Pending <span class="badge bg-warning text-dark ms-2">18</span></button>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <!-- MAIN LAYOUT -->
+  <div class="container-fluid">
+    <div class="row g-4">
+      <!-- SIDEBAR (desktop) -->
+      <div class="col-12 col-lg-3 d-none d-lg-block">
+        <aside class="sidebar card-rounded p-3 shadow-sm">
+          <div class="d-flex align-items-center mb-3 gap-3">
+            <div class="avatar">S</div>
+            <div>
+              <div id="userName" class="fw-bold">EM</div>
+              <small class="muted">Product & Support</small>
+            </div>
+          </div>
+
+          <nav class="nav flex-column mb-3">
+            <a class="nav-link " href="Dashboard.html"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a>
+            <a class="nav-link " href="Review.html"><i class="bi bi-gear me-2"></i>Review</a>
+            <a class="nav-link  active" href="Statistics.html"><i class="bi bi-graph-up me-2"></i>Statistics</a>
+          </nav>
+
+          <hr />
+
+          <div class="d-flex flex-column gap-2 mt-3">
+            <!-- additional sidebar items here -->
+          </div>
+        </aside>
+      </div>
+
+      <!-- MAIN CONTENT -->
+      <div class="col-12 col-lg-9">
+        <!-- top header card -->
+        <div class="card p-3 card-rounded mb-3">
+          <!-- Use a single full-width flex container to keep title and controls aligned -->
+          <div class="d-flex align-items-center justify-content-between w-100">
+            <div>
+              <h3 class="mb-0">Statistics Dashboard</h3>
+              <div class="small-muted">Overview & reporting</div>
+            </div>
+
+            <div class="d-flex align-items-center">
+              <input id="fromDate" type="date" class="form-control d-inline-block small-input" style="width:170px"/>
+              <input id="toDate" type="date" class="form-control d-inline-block small-input ms-2" style="width:170px"/>
+              <button id="applyRange" class="btn btn-primary ms-2">Apply</button>
+              <button id="exportPdf" class="btn btn-outline-secondary ms-2">Export PDF</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cards + Charts -->
+        <div id="exportArea">
+          <div class="row g-3 mb-3">
+            <div class="col-6 col-md-3">
+              <div class="card card-rounded p-3 h-100">
+                <div class="small-muted">Total Applications</div>
+                <div id="totalApplications" class="big-number">0</div>
+              </div>
+            </div>
+            <div class="col-6 col-md-3">
+              <div class="card card-rounded p-3 h-100">
+                <div class="small-muted">Pending</div>
+                <div id="pending" class="big-number text-warning">0</div>
+              </div>
+            </div>
+            <div class="col-6 col-md-3">
+              <div class="card card-rounded p-3 h-100">
+                <div class="small-muted">Approved</div>
+                <div id="approved" class="big-number text-success">0</div>
+              </div>
+            </div>
+            <div class="col-6 col-md-3">
+              <div class="card card-rounded p-3 h-100">
+                <div class="small-muted">Rejected</div>
+                <div id="rejected" class="big-number text-danger">0</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row g-3 mb-4">
+            <div class="col-12 col-lg-4">
+              <div class="chart-wrap h-100 d-flex flex-column">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <div>
+                    <strong>Risk Distribution</strong>
+                    <div class="small-muted">Low / Medium / High</div>
+                  </div>
+                  <div>Overdue: <span id="overdueReviews" class="fw-bold text-danger">0</span></div>
+                </div>
+                <div class="flex-grow-1 d-flex align-items-center justify-content-center">
+                  <canvas id="riskPie" height="240"></canvas>
+                </div>
+                <div class="mt-2 small-muted d-flex justify-content-between">
+                  <div id="riskLowLabel"></div>
+                  <div id="riskMediumLabel"></div>
+                  <div id="riskHighLabel"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-12 col-lg-8">
+              <div class="chart-wrap">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <div>
+                    <strong>Applications Over Time</strong>
+                    <div class="small-muted">Grouped by month</div>
+                  </div>
+                  <div class="small-muted">Range: <span id="rangeText"></span></div>
+                </div>
+                <canvas id="trendLine" height="200"></canvas>
+              </div>
+            </div>
+          </div>
+        </div> <!-- end exportArea -->
+      </div> <!-- end main col -->
+    </div> <!-- end row -->
+  </div> <!-- end container-fluid -->
+
+
+<script>
+(() => {
+  const API_BASE = 'https://client-onboarding-9xa0jb4pn-shahzaib1044s-projects.vercel.app'; // adjust if different
+  const TOKEN_KEY = 'token';
+  const SESSION_KEY = 'loginTime';
+  const MAX_SESSION_DURATION = 30 * 60 * 1000; // 30 min
+
+  function getToken(){ return localStorage.getItem(TOKEN_KEY); }
+  async function apiFetch(endpoint, options = {}) {
+    const token = getToken();
+    const loginTime = localStorage.getItem(SESSION_KEY);
+    if (!token || !loginTime || Date.now() - loginTime > MAX_SESSION_DURATION) {
+      alert('Session expired. Please log in again.');
+      window.location.href = 'login.html';
+      return;
+    }
+    localStorage.setItem(SESSION_KEY, Date.now());
+    const res = await fetch(`${API_BASE}${endpoint}`, {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(options.headers || {}),
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(()=>({}));
+      throw new Error(err.message || 'API error');
+    }
+    return res.json();
+  }
+const userNameEl = document.getElementById("userName");
+   const userNameE2 = document.getElementById("userName1");
+
+const token = getToken();
+
+  async function apiFetch(endpoint, options = {}){
+    const token = getToken();
+    const loginTime = localStorage.getItem(SESSION_KEY);
+
+    if (!token || !loginTime || Date.now() - loginTime > MAX_SESSION_DURATION) {
+      alert('Session expired. Please log in again.');
+      window.location.reload();
+      return;
+    }
+
+    localStorage.setItem(SESSION_KEY, Date.now());
+
+    const res = await fetch(`${API_BASE}${endpoint}`, {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(options.headers || {}),
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    if (!res.ok) {
+      const error = await res.json().catch(() => ({}));
+      throw new Error(error.message || 'API request failed');
+    }
+
+    return res.json();
+  }
+  /* ========= Logout ========= */
+async function logout() {
+  // remove token + session data
+  localStorage.removeItem(TOKEN_KEY);
+  localStorage.removeItem(SESSION_KEY);
+  localStorage.removeItem('userId');
+  window.location.href = 'login.html';
+}
+  const userEmailEl = document.getElementById('userEmail');
+const payload = JSON.parse(atob(token.split('.')[1]));
+    userEmailEl.textContent = payload.email
+    const username = payload.email ? payload.email.split('@')[0] : '';
+    
+   userNameEl.textContent = username
+   userNameE2.textContent = username
+  // Chart instances
+  let pieChart = null;
+  let lineChart = null;
+
+  function renderCards(stats){
+    document.getElementById('totalApplications').textContent = stats.totalApplications || 0;
+    document.getElementById('pending').textContent = stats.pending || 0;
+    document.getElementById('approved').textContent = stats.approved || 0;
+    document.getElementById('rejected').textContent = stats.rejected || 0;
+    document.getElementById('overdueReviews').textContent = stats.overdueReviews || 0;
+    document.getElementById('rangeText').textContent = (new Date(stats.from)).toLocaleDateString() + ' — ' + (new Date(stats.to)).toLocaleDateString();
+  }
+
+  function renderRiskPie(riskDistribution){
+    const low = riskDistribution.low.count || 0;
+    const med = riskDistribution.medium.count || 0;
+    const high = riskDistribution.high.count || 0;
+    const labels = ['Low','Medium','High'];
+    const data = [low, med, high];
+
+    if (pieChart) pieChart.destroy();
+    const ctx = document.getElementById('riskPie').getContext('2d');
+    pieChart = new Chart(ctx, {
+      type: 'pie',
+      data: { labels, datasets: [{ data }] },
+      options: { plugins: { legend: { position: 'bottom' } } }
+    });
+
+    document.getElementById('riskLowLabel').textContent = `Low: ${low} (${riskDistribution.low.percent}%)`;
+    document.getElementById('riskMediumLabel').textContent = `Medium: ${med} (${riskDistribution.medium.percent}%)`;
+    document.getElementById('riskHighLabel').textContent = `High: ${high} (${riskDistribution.high.percent}%)`;
+  }
+
+  function renderTrendLine(trendsData){
+    const labels = trendsData.map(t => {
+      // convert "YYYY-MM" -> "MMM YYYY"
+      const parts = t.period.split('-');
+      const d = new Date(parseInt(parts[0],10), parseInt(parts[1],10)-1, 1);
+      return d.toLocaleString(undefined, { month:'short', year:'numeric' });
+    });
+    const data = trendsData.map(t => t.count || 0);
+
+    if (lineChart) lineChart.destroy();
+    const ctx = document.getElementById('trendLine').getContext('2d');
+    lineChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [{
+          label: 'Applications',
+          data,
+          fill: true,
+          tension: 0.25,
+          pointRadius: 4
+        }]
+      },
+      options: {
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true, precision: 0 } }
+      }
+    });
+  }
+
+  async function loadStatistics(from, to) {
+    try {
+      const qs = new URLSearchParams();
+      if (from) qs.set('from', from);
+      if (to) qs.set('to', to);
+      const stats = await apiFetch(`/api/dashboard/statistics?${qs.toString()}`);
+      renderCards(stats);
+      renderRiskPie(stats.riskDistribution || { low: {}, medium: {}, high: {}});
+      renderTrendLine(stats.trendsData || []);
+    } catch (err) {
+      console.error(err);
+      alert('Failed to load statistics: ' + err.message);
+    }
+  }
+
+  // Setup date inputs default to last 6 months
+  const fromInput = document.getElementById('fromDate');
+  const toInput = document.getElementById('toDate');
+  const applyBtn = document.getElementById('applyRange');
+
+  (function setDefaults(){
+    const now = new Date();
+    const to = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const from = new Date(to.getFullYear(), to.getMonth() - 5, 1); // approx last 6 months
+    fromInput.valueAsDate = from;
+    toInput.valueAsDate = to;
+  })();
+
+  applyBtn.addEventListener('click', () => {
+    const from = fromInput.value;
+    const to = toInput.value;
+    loadStatistics(from, to);
+  });
+
+  // Export PDF
+  document.getElementById('exportPdf').addEventListener('click', () => {
+    const element = document.getElementById('exportArea');
+    const opt = {
+      margin:       0.2,
+      filename:     'dashboard_statistics.pdf',
+      image:        { type: 'jpeg', quality: 0.98 },
+      html2canvas:  { scale: 2 },
+      jsPDF:        { unit: 'in', format: 'a4', orientation: 'landscape' }
+    };
+    html2pdf().set(opt).from(element).save();
+  });
+
+  // Auto-refresh every 5 minutes
+  const FIVE_MIN = 5 * 60 * 1000;
+  let refreshTimer = null;
+  function startAutoRefresh(){
+    if (refreshTimer) clearInterval(refreshTimer);
+    refreshTimer = setInterval(()=> {
+      const from = fromInput.value;
+      const to = toInput.value;
+      loadStatistics(from, to);
+    }, FIVE_MIN);
+  }
+
+  // initial load
+  document.addEventListener('DOMContentLoaded', () => {
+    const from = fromInput.value;
+    const to = toInput.value;
+    loadStatistics(from, to);
+    startAutoRefresh();
+  });
+
+})();
+</script>
+</body>
+</html>

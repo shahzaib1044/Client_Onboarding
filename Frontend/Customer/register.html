@@ -1,0 +1,657 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Customer Registration</title>
+
+  <!-- Bootstrap 5 CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    /* Small custom styles */
+    .error { color: #dc3545; font-size: 0.9em; }
+    .valid { color: #198754; font-size: 0.9em; }
+    .currency-input { text-align: right; }
+    .spinner-border-sm { width: 1rem; height: 1rem; border-width: .15rem; }
+    
+     button {
+      width: 100%;
+      height: 45px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      background: #9fc3ff;
+      cursor: not-allowed;
+    }
+
+    .footer-text {
+      text-align: center;
+      font-size: 14px;
+      color: #666;
+      margin-top: 15px;
+    }
+
+    .footer-text a {
+      color: #007bff;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .footer-text a:hover {
+      text-decoration: underline;
+    }
+      .icon {
+      width: 60px;
+      height: 60px;
+      background: #007bff;
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 10px;
+      font-size: 28px;
+    }
+
+  </style>
+</head>
+<body class="bg-light">
+  <div class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+        <div class="card shadow-sm">
+          <div class="card-body">
+    <div class="text-center">
+  <div class="icon">🏢</div>
+  <h2>Create Account</h2>
+  <p>Join our Client Onboarding platform</p>
+</div>
+
+
+            <form id="registerForm" novalidate>
+              <div class="row g-3">
+                <!-- First / Last -->
+                <div class="col-md-6">
+                  <label for="firstName" class="form-label">First Name *</label>
+                  <input type="text" id="firstName" class="form-control" maxlength="50" required>
+                  <div class="error" id="firstNameError"></div>
+                </div>
+                <div class="col-md-6">
+                  <label for="lastName" class="form-label">Last Name *</label>
+                  <input type="text" id="lastName" class="form-control" maxlength="50" required>
+                  <div class="error" id="lastNameError"></div>
+                </div>
+
+                <!-- Email / Phone -->
+                <div class="col-md-6">
+                  <label for="email" class="form-label">Email *</label>
+                  <input type="email" id="email" class="form-control" maxlength="254" required>
+                  <div class="d-flex justify-content-between">
+                    <div class="error" id="emailError"></div>
+                    <div class="valid" id="emailValid"></div>
+                  </div>
+                </div>
+
+                <div class="col-md-6">
+                  <label for="phone" class="form-label">Phone *</label>
+                  <input type="tel" id="phone" class="form-control" placeholder="+XXX XXXXXXXXX" required>
+                  <div class="error" id="phoneError"></div>
+                </div>
+
+                <!-- DOB / Address -->
+                <div class="col-md-6">
+                  <label for="dob" class="form-label">Date of Birth *</label>
+                  <input type="date" id="dob" class="form-control" required>
+                  <div class="error" id="dobError"></div>
+                </div>
+
+                <div class="col-md-6">
+                  <label for="address1" class="form-label">Address Line 1 *</label>
+                  <input type="text" id="address1" class="form-control" maxlength="100" required>
+                  <div class="error" id="address1Error"></div>
+                </div>
+
+                <!-- City / Postal / Country -->
+                <div class="col-md-4">
+                  <label for="city" class="form-label">City *</label>
+                  <input type="text" id="city" class="form-control" maxlength="50" required>
+                  <div class="error" id="cityError"></div>
+                </div>
+                <div class="col-md-4">
+                  <label for="postalCode" class="form-label">Postal Code *</label>
+                  <input type="text" id="postalCode" class="form-control" required>
+                  <div class="error" id="postalCodeError"></div>
+                </div>
+                <div class="col-md-4">
+                  <label for="country" class="form-label">Country *</label>
+                  <select id="country" class="form-select" required>
+                    <option value="">Select country</option>
+                    <!-- Short list; replace with full country list as needed -->
+                    <option value="FI">Finland</option>
+                    <option value="PK">Pakistan</option>
+                    <option value="US">United States</option>
+                    <option value="IE">Ireland</option>
+                    <option value="DE">Germany</option>
+                  </select>
+                  <div class="error" id="countryError"></div>
+                </div>
+
+                <!-- ID Number -->
+                <div class="col-md-6">
+                  <label for="idNumber" class="form-label">ID Number *</label>
+                  <input type="text" id="idNumber" class="form-control" maxlength="20" required>
+                  <div class="d-flex justify-content-between">
+                    <div class="error" id="idNumberError"></div>
+                    <div class="valid" id="idNumberValid"></div>
+                  </div>
+                </div>
+
+                <!-- Annual Income / Employment Status -->
+                <div class="col-md-6">
+                  <label for="annualIncome" class="form-label">Annual Income (€) *</label>
+                  <input type="text" id="annualIncome" class="form-control currency-input" placeholder="€0.00" required>
+                  <div class="error" id="annualIncomeError"></div>
+                </div>
+
+                <div class="col-md-6">
+                  <label for="employmentStatus" class="form-label">Employment Status *</label>
+                  <select id="employmentStatus" class="form-select" required>
+                    <option value="">Select</option>
+                    <option>UNEMPLOYED</option>
+                    <option>PART_TIME</option>
+                    <option>FULL_TIME</option>
+                    <option>SELF_EMPLOYED</option>
+                    <option>RETIRED</option>
+                  </select>
+                  <div class="error" id="employmentStatusError"></div>
+                </div>
+
+                <!-- Account Type (radio) / Initial Deposit -->
+                <fieldset class="col-md-6">
+                  <legend class="col-form-label">Account Type *</legend>
+                  <div>
+                    <div class="form-check form-check-inline">
+                      <input class="form-check-input" type="radio" name="accountType" id="acctBasic" value="BASIC" required>
+                      <label class="form-check-label" for="acctBasic">BASIC</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                      <input class="form-check-input" type="radio" name="accountType" id="acctStandard" value="STANDARD">
+                      <label class="form-check-label" for="acctStandard">STANDARD</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                      <input class="form-check-input" type="radio" name="accountType" id="acctPremium" value="PREMIUM">
+                      <label class="form-check-label" for="acctPremium">PREMIUM</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                      <input class="form-check-input" type="radio" name="accountType" id="acctBusiness" value="BUSINESS">
+                      <label class="form-check-label" for="acctBusiness">BUSINESS</label>
+                    </div>
+                  </div>
+                  <div class="error" id="accountTypeError"></div>
+                </fieldset>
+
+                <div class="col-md-6">
+                  <label for="initialDeposit" class="form-label">Initial Deposit (€) *</label>
+                  <input type="text" id="initialDeposit" class="form-control currency-input" placeholder="€0.00" required>
+                  <div class="error" id="initialDepositError"></div>
+                </div>
+
+                <!-- Password -->
+                <div class="col-md-6">
+                  <label for="password" class="form-label">Password *</label>
+                  <input type="password" id="password" class="form-control" minlength="8" required>
+                  <div class="error" id="passwordError"></div>
+                </div>
+                <div class="col-md-6">
+                  <label for="passwordConfirm" class="form-label">Confirm Password *</label>
+                  <input type="password" id="passwordConfirm" class="form-control" required>
+                  <div class="error" id="passwordConfirmError"></div>
+                </div>
+
+                <!-- File upload (optional) -->
+                <div class="col-12">
+                  <label for="documents" class="form-label">Upload Documents (optional)</label>
+                  <input type="file" id="documents" class="form-control" multiple>
+                </div>
+
+                <!-- Submit -->
+                <div >
+                  <div id="formMessage" role="status" aria-live="polite"></div>
+                  <div>
+                    <button type="submit" id="submitBtn" class="btn btn-primary" disabled>
+                      <span id="submitSpinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                      <span id="submitTxt">Register</span>
+                    </button>
+                  </div>
+                </div>
+
+              </div>
+               <div class="footer-text">
+        Already have an account? <a href="login.html">Sign in</a>
+      </div>
+            </form>
+
+            <!-- Success template -->
+            <div id="successBox" class="alert alert-success mt-4 d-none" role="alert">
+              <strong>Registration successful!</strong>
+              <div id="successMessage" class="mt-2"></div>
+            </div>
+
+            <!-- Error summary -->
+            <div id="serverErrors" class="alert alert-danger mt-3 d-none"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS & Popper -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    /*
+      Client-side validation + real-time (on blur) + uniqueness checks.
+      IMPORTANT: Replace the "check" endpoints with your real endpoints:
+        - POST /api/auth/check-email  { email } -> { exists: true/false }
+        - POST /api/customers/check-id { idNumber } -> { exists: true/false }
+      Registration POST goes to /api/auth/register (as you provided).
+      Also server should validate again (server-side snippet included below).
+    */
+
+    const form = document.getElementById('registerForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const submitSpinner = document.getElementById('submitSpinner');
+    const submitTxt = document.getElementById('submitTxt');
+    const formMessage = document.getElementById('formMessage');
+    const successBox = document.getElementById('successBox');
+    const successMessage = document.getElementById('successMessage');
+    const serverErrors = document.getElementById('serverErrors');
+
+    // Fields
+    const fields = {
+      firstName: document.getElementById('firstName'),
+      lastName: document.getElementById('lastName'),
+      email: document.getElementById('email'),
+      phone: document.getElementById('phone'),
+      dob: document.getElementById('dob'),
+      address1: document.getElementById('address1'),
+      city: document.getElementById('city'),
+      postalCode: document.getElementById('postalCode'),
+      country: document.getElementById('country'),
+      idNumber: document.getElementById('idNumber'),
+      annualIncome: document.getElementById('annualIncome'),
+      employmentStatus: document.getElementById('employmentStatus'),
+      initialDeposit: document.getElementById('initialDeposit'),
+      password: document.getElementById('password'),
+      passwordConfirm: document.getElementById('passwordConfirm'),
+    };
+
+    // Error elements map
+    const errors = {
+      firstNameError: document.getElementById('firstNameError'),
+      lastNameError: document.getElementById('lastNameError'),
+      emailError: document.getElementById('emailError'),
+      emailValid: document.getElementById('emailValid'),
+      phoneError: document.getElementById('phoneError'),
+      dobError: document.getElementById('dobError'),
+      address1Error: document.getElementById('address1Error'),
+      cityError: document.getElementById('cityError'),
+      postalCodeError: document.getElementById('postalCodeError'),
+      countryError: document.getElementById('countryError'),
+      idNumberError: document.getElementById('idNumberError'),
+      idNumberValid: document.getElementById('idNumberValid'),
+      annualIncomeError: document.getElementById('annualIncomeError'),
+      employmentStatusError: document.getElementById('employmentStatusError'),
+      accountTypeError: document.getElementById('accountTypeError'),
+      initialDepositError: document.getElementById('initialDepositError'),
+      passwordError: document.getElementById('passwordError'),
+      passwordConfirmError: document.getElementById('passwordConfirmError'),
+    };
+
+    // Utility regex / validators
+    const phoneRegex = /^\+\d{1,3}\s\d{6,14}$/; // +CCC NNNNNNN...
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const postalRegex = /^[A-Za-z0-9 \-]{3,12}$/; // flexible; adapt to country as needed
+    const currencyDisplay = (num) => {
+      if (num === '' || num === null || isNaN(Number(num))) return '';
+      const v = Number(num);
+      return '€' + v.toLocaleString('en-IE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    };
+    const parseCurrency = (str) => {
+      if (!str) return NaN;
+      return Number(str.replace(/[^\d.-]/g, ''));
+    };
+
+    // Track validation state
+    const validity = {};
+
+    // Setup blur listeners for real-time validation
+    Object.keys(fields).forEach(key => {
+      const el = fields[key];
+      if (!el) return;
+      el.addEventListener('blur', () => validateField(key));
+      // live formatting for currency fields
+      if (key === 'annualIncome' || key === 'initialDeposit') {
+        el.addEventListener('input', (e) => {
+          const caret = el.selectionStart;
+          // accept digits, dot, comma, euro sign, spaces
+          const cleaned = el.value.replace(/[^\d.,-]/g, '').replace(',', '.');
+          // keep raw for parsing but display formatted
+          const num = parseFloat(cleaned);
+          if (!isNaN(num)) {
+            el.value = currencyDisplay(num);
+          } else {
+            // allow clearing
+            el.value = cleaned;
+          }
+        });
+        el.addEventListener('blur', () => {
+          const num = parseCurrency(el.value);
+          if (!isNaN(num)) el.value = currencyDisplay(num);
+        });
+      }
+    });
+
+    // Additional event: check email uniqueness on blur
+    fields.email.addEventListener('blur', async () => {
+      await validateField('email');
+      if (validity.email) {
+        await checkEmailUnique(fields.email.value);
+      }
+      updateSubmitState();
+    });
+
+    // ID uniqueness check on blur
+    fields.idNumber.addEventListener('blur', async () => {
+      await validateField('idNumber');
+      if (validity.idNumber) {
+        await checkIdUnique(fields.idNumber.value);
+      }
+      updateSubmitState();
+    });
+
+    // Validate a single field
+    async function validateField(key) {
+      let ok = true;
+      const val = fields[key] ? fields[key].value.trim() : '';
+      switch (key) {
+        case 'firstName':
+          if (!val) { errors.firstNameError.textContent = 'First name is required'; ok = false; }
+          else errors.firstNameError.textContent = '';
+          break;
+        case 'lastName':
+          if (!val) { errors.lastNameError.textContent = 'Last name is required'; ok = false; }
+          else errors.lastNameError.textContent = '';
+          break;
+        case 'email':
+          errors.emailValid.textContent = '';
+          if (!val) { errors.emailError.textContent = 'Email is required'; ok = false; }
+          else if (!emailRegex.test(val)) { errors.emailError.textContent = 'Invalid email format'; ok = false; }
+          else errors.emailError.textContent = '';
+          break;
+        case 'phone':
+          if (!val) { errors.phoneError.textContent = 'Phone is required'; ok = false; }
+          else if (!phoneRegex.test(val)) { errors.phoneError.textContent = 'Invalid phone format. Use +CCC NNNNNNN'; ok = false; }
+          else errors.phoneError.textContent = '';
+          break;
+        case 'dob':
+          if (!val) { errors.dobError.textContent = 'Date of birth is required'; ok = false; }
+          else {
+            const dob = new Date(val);
+            if (Number.isNaN(dob.getTime())) { errors.dobError.textContent = 'Invalid date'; ok = false; }
+            else {
+              const age = getAge(dob);
+              if (age < 18) { errors.dobError.textContent = 'You must be 18 or older'; ok = false; }
+              else errors.dobError.textContent = '';
+            }
+          }
+          break;
+        case 'address1':
+          if (!val) { errors.address1Error.textContent = 'Address is required'; ok = false; }
+          else errors.address1Error.textContent = '';
+          break;
+        case 'city':
+          if (!val) { errors.cityError.textContent = 'City is required'; ok = false; }
+          else errors.cityError.textContent = '';
+          break;
+        case 'postalCode':
+          if (!val) { errors.postalCodeError.textContent = 'Postal code is required'; ok = false; }
+          else if (!postalRegex.test(val)) { errors.postalCodeError.textContent = 'Invalid postal code format'; ok = false; }
+          else errors.postalCodeError.textContent = '';
+          break;
+        case 'country':
+          if (!val) { errors.countryError.textContent = 'Country is required'; ok = false; }
+          else errors.countryError.textContent = '';
+          break;
+        case 'idNumber':
+          if (!val) { errors.idNumberError.textContent = 'ID number is required'; ok = false; }
+          else if (val.length > 20) { errors.idNumberError.textContent = 'ID number must be <= 20 chars'; ok = false; }
+          else errors.idNumberError.textContent = '';
+          break;
+        case 'annualIncome':
+          {
+            const num = parseCurrency(val);
+            if (isNaN(num)) { errors.annualIncomeError.textContent = 'Invalid income'; ok = false; }
+            else if (num < 0) { errors.annualIncomeError.textContent = 'Income must be >= 0'; ok = false; }
+            else errors.annualIncomeError.textContent = '';
+          }
+          break;
+        case 'initialDeposit':
+          {
+            const num = parseCurrency(val);
+            if (isNaN(num)) { errors.initialDepositError.textContent = 'Invalid deposit amount'; ok = false; }
+            else if (num < 0) { errors.initialDepositError.textContent = 'Deposit cannot be negative'; ok = false; }
+            else errors.initialDepositError.textContent = '';
+          }
+          break;
+        case 'employmentStatus':
+          if (!val) { errors.employmentStatusError.textContent = 'Select employment status'; ok = false; }
+          else errors.employmentStatusError.textContent = '';
+          break;
+        case 'password':
+          {
+            const pw = val;
+            const rules = [];
+            if (pw.length < 8) rules.push('min 8 chars');
+            if (!/[A-Z]/.test(pw)) rules.push('one uppercase');
+            if (!/[a-z]/.test(pw)) rules.push('one lowercase');
+            if (!/[0-9]/.test(pw)) rules.push('one number');
+            if (!/[^A-Za-z0-9]/.test(pw)) rules.push('one special char');
+            if (rules.length) { errors.passwordError.textContent = 'Password requires: ' + rules.join(', '); ok = false; }
+            else errors.passwordError.textContent = '';
+          }
+          break;
+        case 'passwordConfirm':
+          if (val !== fields.password.value) { errors.passwordConfirmError.textContent = 'Passwords do not match'; ok = false; }
+          else errors.passwordConfirmError.textContent = '';
+          break;
+        default:
+          break;
+      }
+
+      validity[key] = ok;
+      updateSubmitState();
+      return ok;
+    }
+
+    function getAge(dob) {
+      const today = new Date();
+      let age = today.getFullYear() - dob.getFullYear();
+      const m = today.getMonth() - dob.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) age--;
+      return age;
+    }
+
+    // Email
+async function checkEmailUnique(email) {
+  const res = await fetch(`https://client-onboarding-9xa0jb4pn-shahzaib1044s-projects.vercel.app/api/auth/check-email?email=${encodeURIComponent(email)}`);
+  const data = await res.json();
+  if (data.exists) {
+    errors.emailError.textContent = 'Email already in use';
+    validity.email = false;
+  } else {
+    errors.emailError.textContent = '';
+    errors.emailValid.textContent = 'Email available';
+    validity.email = true;
+  }
+}
+
+// ID
+async function checkIdUnique(idNumber) {
+  const res = await fetch(`https://client-onboarding-9xa0jb4pn-shahzaib1044s-projects.vercel.app/api/auth/check-id?id_number=${encodeURIComponent(idNumber)}`);
+  const data = await res.json();
+  if (data.exists) {
+    errors.idNumberError.textContent = 'ID Number already in use';
+    validity.idNumber = false;
+  } else {
+    errors.idNumberError.textContent = '';
+    errors.idNumberValid.textContent = 'ID available';
+    validity.idNumber = true;
+  }
+}
+
+    // Update submit button disabled state
+    function updateSubmitState() {
+      // Required fields list
+      const requiredKeys = [
+        'firstName','lastName','email','phone','dob','address1','city','postalCode',
+        'country','idNumber','annualIncome','employmentStatus','initialDeposit','password','passwordConfirm'
+      ];
+      const allValid = requiredKeys.every(k => validity[k] === true);
+      submitBtn.disabled = !allValid;
+    }
+
+    // Form submit handler
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      serverErrors.classList.add('d-none');
+      formMessage.textContent = '';
+      // Validate all fields synchronously
+      for (const key of Object.keys(fields)) {
+        await validateField(key);
+      }
+      // ensure account type radio
+      const accountType = document.querySelector('input[name="accountType"]:checked');
+      if (!accountType) {
+        document.getElementById('accountTypeError').textContent = 'Select account type';
+        validity.accountType = false;
+      } else {
+        document.getElementById('accountTypeError').textContent = '';
+        validity.accountType = true;
+      }
+      updateSubmitState();
+      if (submitBtn.disabled) {
+        formMessage.innerHTML = '<span class="text-danger">Please fix the errors above before submitting.</span>';
+        return;
+      }
+
+      // Prepare payload (clean currencies)
+      const payload = {
+        email: fields.email.value.trim(),
+        password: fields.password.value,
+        firstName: fields.firstName.value.trim(),
+        lastName: fields.lastName.value.trim(),
+        dateOfBirth: fields.dob.value,
+        phone: fields.phone.value.trim(),
+        address: fields.address1.value.trim(),
+        city: fields.city.value.trim(),
+        postalCode: fields.postalCode.value.trim(),
+        country: fields.country.value,
+        idNumber: fields.idNumber.value.trim(),
+        annualIncome: parseCurrency(fields.annualIncome.value),
+        employmentStatus: fields.employmentStatus.value,
+        accountType: document.querySelector('input[name="accountType"]:checked')?.value,
+        initialDeposit: parseCurrency(fields.initialDeposit.value)
+      };
+
+      // UI: submitting
+      submitSpinner.classList.remove('d-none');
+      submitTxt.textContent = 'Registering...';
+      submitBtn.disabled = true;
+
+      try {
+        // POST to registration endpoint (use your provided endpoint)
+        const res = await fetch('https://client-onboarding-9xa0jb4pn-shahzaib1044s-projects.vercel.app/api/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const body = await res.json();
+
+        if (res.ok) {
+          // Success behaviour: show message, reference number, redirect
+          const reference = generateReference();
+          const ts = new Date().toISOString();
+          successMessage.innerHTML = `
+            <div>Registration successful! Your application is being reviewed.</div>
+            <div class="mt-2"><strong>Reference:</strong> ${reference}</div>
+            <div class="mt-1"><small>Submitted at ${new Date().toLocaleString()}</small></div>
+          `;
+          successBox.classList.remove('d-none');
+
+          // Log registration event (console + API audit)
+          console.info('Registration event', { email: payload.email, reference, ts });
+          // OPTIONAL: post audit log to server
+          navigator.sendBeacon?.('https://client-onboarding-9xa0jb4pn-shahzaib1044s-projects.vercel.app/api/audit/log', JSON.stringify({ event: 'REGISTER', email: payload.email, reference, timestamp: ts }));
+
+          // redirect to dashboard after 3 seconds
+          setTimeout(() => {
+            window.location.href = 'login.html';
+          }, 3000);
+        } else {
+          // Non-2xx response: show errors
+          if (res.status === 400 && body && body.errors) {
+            // assume { errors: { field: 'message', ... } }
+            const fieldErrors = body.errors;
+            // display field-specific and summary
+            Object.keys(fieldErrors).forEach(f => {
+              const el = document.getElementById(f + 'Error');
+              if (el) el.textContent = fieldErrors[f];
+            });
+            serverErrors.textContent = 'Please fix the highlighted errors and try again.';
+            serverErrors.classList.remove('d-none');
+          } else if (res.status === 409 && body && body.error) {
+            serverErrors.textContent = body.error;
+            serverErrors.classList.remove('d-none');
+          } else {
+            serverErrors.textContent = body.message || 'Registration failed';
+            serverErrors.classList.remove('d-none');
+          }
+        }
+      } catch (err) {
+        console.error('Registration request failed', err);
+        serverErrors.textContent = 'Registration failed: ' + (err.message || err);
+        serverErrors.classList.remove('d-none');
+      } finally {
+        submitSpinner.classList.add('d-none');
+        submitTxt.textContent = 'Register';
+        updateSubmitState();
+      }
+    });
+
+    // Generates a short application reference number
+    function generateReference() {
+      const now = Date.now().toString(36).toUpperCase();
+      const rand = Math.floor(Math.random() * 9000 + 1000).toString();
+      return `APP-${now}-${rand}`;
+    }
+
+    // Initialize: run minimal validations to set initial state
+    (function init() {
+      // set validity false for requireds
+      ['firstName','lastName','email','phone','dob','address1','city','postalCode','country','idNumber','annualIncome','employmentStatus','initialDeposit','password','passwordConfirm'].forEach(k => validity[k] = false);
+      updateSubmitState();
+    })();
+
+  </script>
+</body>
+</html>

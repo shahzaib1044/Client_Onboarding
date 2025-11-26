@@ -1,0 +1,734 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Employee Dashboard — Polished</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <style>
+    :root{--brand:#0d6efd;--muted:#6c757d;--card-radius:14px}
+    html,body{height:100%}
+    body{background:linear-gradient(180deg,#f7fbff 0%,#ffffff 70%);font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial;color:#0f1724}
+
+    /* Navbar */
+    .navbar{background:transparent}
+    .brand-bubble{width:46px;height:46px;border-radius:12px;background:linear-gradient(135deg,var(--brand),#6fa8ff);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700}
+
+    /* layout */
+    .sidebar{min-width:220px;max-width:260px;padding:1rem;border-radius:var(--card-radius);background:linear-gradient(180deg,rgba(13,110,253,0.04),rgba(13,110,253,0.02));height:100%}
+    .sidebar .nav-link{color:var(--muted)}
+    .sidebar .nav-link.active{color:var(--brand);font-weight:600}
+
+    .card-rounded{border-radius:var(--card-radius);box-shadow:0 8px 30px rgba(16,24,40,0.04)}
+    .stat-card{border-radius:12px;padding:1rem}
+
+    /* table */
+    .table thead th{border-bottom:0;color:#556070}
+    .table tbody tr{background:#fff;border-radius:10px;margin-bottom:12px;box-shadow:0 6px 18px rgba(12,23,40,0.03)}
+    .table{border-collapse:separate;border-spacing:0 12px}
+    .table td,.table th{vertical-align:middle;border:0;padding:1rem}
+
+    /* badges */
+    .status-badge{padding:.45rem .75rem;border-radius:999px;font-weight:700;font-size:.85rem;display:inline-block}
+    .status-DRAFT{background:#fff3cd;color:#856404}
+    .status-APPROVED{background:#e6fbef;color:#0f5132}
+    .status-REJECTED{background:#fdecea;color:#7a1a1a}
+
+    .risk-badge{padding:.35rem .6rem;border-radius:999px;font-weight:700;font-size:.82rem}
+    .risk-LOW{background:#e6f7ee;color:#0f5132}
+    .risk-MEDIUM{background:#fff4e5;color:#664d03}
+    .risk-HIGH{background:#fdecea;color:#58151a}
+
+    /* helper */
+    .muted{color:var(--muted)}
+    .avatar{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700}
+
+    @media (max-width:991px){
+      .sidebar{display:none} /* desktop sidebar hidden on mobile (we use offcanvas) */
+      .table{font-size:.92rem}
+    }
+
+    /* small input tweaks */
+    .form-control, .form-select{min-height:44px}
+
+  </style>
+</head>
+<body>
+  <!-- NAV -->
+  <nav class="navbar navbar-expand-lg mb-4 px-4">
+    <div class="container-fluid">
+      <div class="d-flex align-items-center gap-3">
+        <!-- mobile sidebar toggle -->
+        <button class="btn btn-outline-secondary d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileSidebar" aria-controls="mobileSidebar">
+          <i class="bi bi-list"></i>
+        </button>
+
+        <a class="navbar-brand d-flex align-items-center gap-3" href="#">
+          <div class="brand-bubble">CO</div>
+          <div>
+            <div class="fw-bold">Client Onboarding</div>
+            <small class="muted">Employee Portal</small>
+          </div>
+        </a>
+      </div>
+
+      <div class="d-flex align-items-center ms-auto gap-3">
+        <div class="text-end d-none d-md-block">
+          <div id="userEmail" class="fw-semibold">user@example.com</div>
+          <small class="muted" id="userRole">Employee</small>
+        </div>
+        <button id="logoutBtn" class="btn btn-outline-danger btn-sm">Logout</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- mobile offcanvas sidebar -->
+  <div class="offcanvas offcanvas-start" tabindex="-1" id="mobileSidebar" aria-labelledby="mobileSidebarLabel">
+    <div class="offcanvas-header">
+      <h5 class="offcanvas-title" id="mobileSidebarLabel">Menu</h5>
+      <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+      <aside class="p-0">
+        <div class="d-flex align-items-center mb-3 gap-3">
+          <div class="avatar" style="background:linear-gradient(135deg,#0d6efd,#6fa8ff)">S</div>
+          <div>
+             <div id="userName" class="fw-bold"></div>
+            <small class="muted">Product & Support</small>
+          </div>
+        </div>
+        <nav class="nav flex-column mb-3">
+          <a class="nav-link active" href="Dashboard.html"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a>
+     
+          <a class="nav-link" href="Review.html"><i class="bi bi-gear me-2"></i>Review</a>
+          <a class="nav-link" href="Statistics.html"><i class="bi bi-graph-up me-2"></i>Statistics</a>
+        </nav>
+        <hr />
+        <div>
+          <small class="text-uppercase muted">Quick filters</small>
+          <div class="d-flex flex-column gap-2 mt-2">
+            <button class="btn btn-sm btn-outline-primary text-start">All Customers</button>
+            <button class="btn btn-sm btn-outline-success text-start">Approved <span class="badge bg-success ms-2">142</span></button>
+            <button class="btn btn-sm btn-outline-warning text-start">Pending <span class="badge bg-warning text-dark ms-2">18</span></button>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <div class="container-fluid">
+    <div class="row g-4">
+      <!-- SIDEBAR (desktop) -->
+      <div class="col-lg-3 d-none d-lg-block">
+        <aside class="sidebar card-rounded p-3 shadow-sm">
+          <div class="d-flex align-items-center mb-3 gap-3">
+            <div class="avatar" style="background:linear-gradient(135deg,#0d6efd,#6fa8ff)">S</div>
+            <div>
+              <div id="userName1" class="fw-bold"></div>
+              <small class="muted">Product & Support</small>
+            </div>
+          </div>
+          <nav class="nav flex-column mb-3">
+            <a class="nav-link active" href="Dashboard.html"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a>
+            
+            <a class="nav-link" href="Review.html"><i class="bi bi-gear me-2"></i>Review</a>
+            <a class="nav-link" href="Statistics.html"><i class="bi bi-graph-up me-2"></i>Statistics</a>
+          </nav>
+
+          <hr />
+          <div>
+            <small class="text-uppercase muted"></small>
+            <div class="d-flex flex-column gap-2 mt-2">
+              
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      <!-- MAIN -->
+      <div class="col-lg-9">
+        <!-- summary -->
+        <div class="row g-3 mb-3">
+      <div class="col-md-4">
+  <div class="card p-3 stat-card">
+    <div class="d-flex justify-content-between align-items-center">
+      <div>
+        <div class="muted small">Total Customers</div>
+        <div id="totalCustomers" class="h4 fw-bold">0</div>
+      </div>
+      <div class="text-success small"><i class="bi bi-arrow-up-right"></i> 8.3%</div>
+    </div>
+  </div>
+</div>
+
+<div class="col-md-4">
+  <div class="card p-3 stat-card">
+    <div class="d-flex justify-content-between align-items-center">
+      <div>
+        <div class="muted small">Pending Reviews</div>
+        <div id="pendingReviews" class="h4 fw-bold">0</div>
+      </div>
+      <div class="text-warning small"><i class="bi bi-clock-history"></i></div>
+    </div>
+  </div>
+</div>
+
+<div class="col-md-4">
+  <div class="card p-3 stat-card">
+    <div class="d-flex justify-content-between align-items-center">
+      <div>
+        <div class="muted small">High Risk</div>
+        <div id="highRisk" class="h4 fw-bold text-danger">0</div>
+      </div>
+      <div class="muted small"><i class="bi bi-shield-lock"></i></div>
+    </div>
+  </div>
+</div>
+
+        </div>
+
+        <!-- filters -->
+        <div class="card card-rounded p-3 mb-4 shadow-sm">
+          <div class="row g-2 align-items-center">
+            <div class="col-lg-5">
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-search"></i></span>
+                <input id="searchInput" class="form-control" placeholder="Search by name, email, or ID" />
+                <button id="clearSearch" class="btn btn-outline-secondary" title="Clear"><i class="bi bi-x"></i></button>
+              </div>
+            </div>
+            <div class="col-lg-2"><select id="statusFilter" class="form-select"><option value="ALL">All Statuses</option><option value="DRAFT">DRAFT</option><option value="APPROVED">Approved</option><option value="REJECTED">Rejected</option></select></div>
+            <div class="col-lg-2"><select id="riskFilter" class="form-select"><option value="ALL">All Risks</option><option value="LOW">Low</option><option value="MEDIUM">Medium</option><option value="HIGH">High</option></select></div>
+            <div class="col-lg-3 d-flex gap-2">
+              <input type="date" id="fromDate" class="form-control" />
+              <input type="date" id="toDate" class="form-control" />
+            </div>
+            <div class="col-12 text-end mt-2">
+              <button class="btn btn-primary me-2" onclick="applyFilters()">Apply</button>
+              <button class="btn btn-outline-secondary" onclick="clearFilters()">Clear</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- table card -->
+        <div class="card card-rounded p-0 shadow-sm">
+          <div class="p-3 border-bottom d-flex justify-content-between align-items-center">
+            <div class="fw-bold">Customers</div>
+            <div class="muted small">Showing <span id="rowCount">0</span> results</div>
+          </div>
+
+          <div class="table-responsive p-3">
+            <table class="table align-middle" id="customersTable">
+              <thead>
+                <tr class="muted small">
+                  <th class="ps-0">Customer</th>
+                  <th>Email</th>
+                  <th>Registration</th>
+                  <th>Status</th>
+                  <th>Risk</th>
+                  <th class="text-end pe-0">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="customersTbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- DETAIL MODAL -->
+  <div class="modal fade" id="customerDetailModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="detailTitle">Customer Details</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body" id="customerDetailBody"></div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button class="btn btn-success" id="approveBtn">Approve</button>
+          <button class="btn btn-danger" id="rejectBtn">Reject</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONFIRM/REJECT MODALS -->
+  <div class="modal fade" id="approveConfirmModal" tabindex="-1">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Confirm Approval</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <p>Are you sure you want to approve this customer?</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" id="confirmApproveBtn" class="btn btn-success">Approve</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="rejectConfirmModal" tabindex="-1">
+    <div class="modal-dialog modal-md modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Reject Customer</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-2">Please provide a reason for rejection (min 10 characters):</div>
+          <textarea id="rejectReason" class="form-control" rows="4" placeholder="Enter reason..."></textarea>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" id="confirmRejectBtn" class="btn btn-danger">Reject</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LOGIN MODAL -->
+  <div class="modal fade" id="loginModal" tabindex="-1" data-bs-backdrop="static">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <form id="loginForm" class="p-3">
+          <div class="mb-3"><label class="form-label">Email</label><input id="loginEmail" class="form-control" required /></div>
+          <div class="mb-3"><label class="form-label">Password</label><input id="loginPassword" type="password" class="form-control" required /></div>
+          <div class="text-end"><button class="btn btn-primary">Login</button></div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+<script>
+(() => {
+  const API_BASE = 'https://client-onboarding-9xa0jb4pn-shahzaib1044s-projects.vercel.app';
+  const PAGE_SIZE = 20;
+
+  let currentResults = [];
+  let filteredResults = [];
+  let page = 1;
+  let totalPages = 1;
+  let pendingCustomerForAction = null; // stores id when opening confirm modal
+
+  const TOKEN_KEY = 'token';
+  const SESSION_KEY = 'loginTime';
+  const MAX_SESSION_DURATION = 30 * 60 * 1000; // 30 min
+
+  const tbody = document.getElementById('customersTbody');
+  const pagination = document.createElement('div');
+  pagination.id = 'pagination';
+  document.querySelector('.table-responsive').appendChild(pagination);
+  const spinner = document.createElement('div');
+  spinner.id = 'loadingSpinner';
+  spinner.className = 'text-center my-3 d-none';
+  spinner.innerHTML = '<div class="spinner-border text-primary" role="status"></div>';
+  document.querySelector('.table-responsive').prepend(spinner);
+  const userEmailEl = document.getElementById('userEmail');
+  const userNameEl = document.getElementById("userName");
+   const userNameE2 = document.getElementById("userName1");
+
+const token = getToken();
+const payload = JSON.parse(atob(token.split('.')[1]));
+    userEmailEl.textContent = payload.email
+    const username = payload.email ? payload.email.split('@')[0] : '';
+    
+   userNameEl.textContent = username
+   userNameE2.textContent = username
+  function showSpinner(show) {spinner.classList.toggle('d-none', !show)}
+
+  function getToken(){return localStorage.getItem(TOKEN_KEY)}
+
+  async function apiFetch(endpoint, options = {}){
+    const token = getToken();
+    const loginTime = localStorage.getItem(SESSION_KEY);
+
+    if (!token || !loginTime || Date.now() - loginTime > MAX_SESSION_DURATION) {
+      alert('Session expired. Please log in again.');
+      window.location.reload();
+      return;
+    }
+
+    localStorage.setItem(SESSION_KEY, Date.now());
+
+    const res = await fetch(`${API_BASE}${endpoint}`, {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(options.headers || {}),
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    if (!res.ok) {
+      const error = await res.json().catch(() => ({}));
+      throw new Error(error.message || 'API request failed');
+    }
+
+    return res.json();
+  }
+
+  function formatDateTimeISOtoDDMMYYYYHHMM(iso) {
+    if (!iso) return '-';
+    const d = new Date(iso);
+    if (isNaN(d)) return iso;
+    const pad = n => String(n).padStart(2, '0');
+    return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  }
+
+  function createRiskBadge(riskLevel, score){
+    const level = (riskLevel||'LOW').toUpperCase();
+    const span = document.createElement('span');
+    span.className = `risk-badge risk-${level}`;
+    span.textContent = `${level} (${score ?? '-'})`;
+    return span;
+  }
+
+  function emptyStateRow(){
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td colspan="6" class="text-center py-4 text-muted">No customers found. Try clearing filters.</td>`;
+    return tr;
+  }
+/* ========= Logout ========= */
+async function logout() {
+  // remove token + session data
+  localStorage.removeItem(TOKEN_KEY);
+  localStorage.removeItem(SESSION_KEY);
+  localStorage.removeItem('userId');
+  window.location.href = 'login.html';
+}
+logoutBtn.addEventListener('click', logout);
+  function renderTableRows(items){
+    tbody.innerHTML = '';
+    document.getElementById('rowCount').textContent = items.length || 0;
+
+    if (!items || items.length === 0) {tbody.appendChild(emptyStateRow());return}
+
+    const start = (page - 1) * PAGE_SIZE;const end = Math.min(start + PAGE_SIZE, items.length);
+
+    for (let i = start; i < end; i++){
+      const c = items[i];
+      const tr = document.createElement('tr');tr.dataset.id = c.id;
+
+      // customer cell
+      const nameTd = document.createElement('td');
+      nameTd.className = 'ps-0';
+      const avatar = document.createElement('div');avatar.className = 'avatar bg-secondary me-3';avatar.textContent = (c.customerName||'').split(' ').map(n=>n[0]).slice(0,2).join('');
+      const nameWrap = document.createElement('div');
+      nameWrap.innerHTML = `<div class="fw-bold">${c.customerName||'-'}</div><div class="muted small">ID: ${c.id ?? '-'}</div>`;
+      const container = document.createElement('div');container.className = 'd-flex align-items-center';container.appendChild(avatar);container.appendChild(nameWrap);nameTd.appendChild(container);
+      tr.appendChild(nameTd);
+
+      // email
+      const emailTd = document.createElement('td');emailTd.textContent = c.email || '-';tr.appendChild(emailTd);
+
+      // registration
+      const dateTd = document.createElement('td');dateTd.textContent = formatDateTimeISOtoDDMMYYYYHHMM(c.registrationDate);tr.appendChild(dateTd);
+
+      // status
+      const statusTd = document.createElement('td');
+      const s = (c.status||'DRAFT').toUpperCase();
+      const statusSpan = document.createElement('span');statusSpan.className = `status-badge status-${s}`;statusSpan.textContent = s;statusTd.appendChild(statusSpan);tr.appendChild(statusTd);
+
+      // risk
+      const riskTd = document.createElement('td');const riskScore = c.risk_score ?? 0;const riskLevel = riskScore >= 70 ? 'HIGH' : riskScore >= 40 ? 'MEDIUM' : 'LOW';riskTd.appendChild(createRiskBadge(riskLevel, riskScore));tr.appendChild(riskTd);
+
+      // actions
+      const actionsTd = document.createElement('td');actionsTd.className='text-end pe-0';
+      const group = document.createElement('div');group.className='btn-group';
+      const viewBtn = document.createElement('button');viewBtn.className='btn btn-sm btn-outline-primary view-btn';viewBtn.innerHTML='<i class="bi bi-eye"></i>';
+      const copyBtn = document.createElement('button');copyBtn.className='btn btn-sm btn-outline-secondary';copyBtn.innerHTML='<i class="bi bi-clipboard"></i>';copyBtn.addEventListener('click',()=>{navigator.clipboard?.writeText(c.email||'')});
+      const delBtn = document.createElement('button');delBtn.className='btn btn-sm btn-outline-danger';delBtn.innerHTML='<i class="bi bi-trash"></i>';delBtn.addEventListener('click',()=>{if(confirm('Delete customer #'+c.id+'?')){currentResults = currentResults.filter(x=>x.id!==c.id);applyFilters()}});
+      group.appendChild(viewBtn);group.appendChild(copyBtn);actionsTd.appendChild(group);tr.appendChild(actionsTd);
+
+      tbody.appendChild(tr);
+    }
+  }
+
+  function renderPagination(total, currentPage){
+    pagination.innerHTML='';totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+    const ul = document.createElement('ul');ul.className='pagination';
+    function pageItem(p,label=null,disabled=false,active=false){const li=document.createElement('li');li.className='page-item'+(disabled?' disabled':'')+(active?' active':'');const a=document.createElement('a');a.className='page-link';a.href='#';a.textContent=label ?? p;a.addEventListener('click',e=>{e.preventDefault();if(disabled||p===currentPage) return;page=p;renderTableRows(filteredResults);renderPagination(filteredResults.length,page)});li.appendChild(a);return li}
+    ul.appendChild(pageItem(Math.max(1,currentPage-1),'«',currentPage===1));
+    const start = Math.max(1,currentPage-2);const end = Math.min(totalPages,start+4);
+    for(let p=start;p<=end;p++) ul.appendChild(pageItem(p,null,false,p===currentPage));
+    ul.appendChild(pageItem(Math.min(totalPages,currentPage+1),'»',currentPage===totalPages));
+    pagination.appendChild(ul);
+  }
+
+  function applyFilters(){
+    const q = document.getElementById('searchInput').value.trim().toLowerCase();
+    const status = document.getElementById('statusFilter').value;
+    const risk = document.getElementById('riskFilter').value;
+    const fromDate = document.getElementById('fromDate').value;
+    const toDate = document.getElementById('toDate').value;
+
+    filteredResults = currentResults.slice();
+
+    if (q.length >= 2) {
+      filteredResults = filteredResults.filter(c => (c.customerName && c.customerName.toLowerCase().includes(q)) || (c.email && c.email.toLowerCase().includes(q)) || (c.id && c.id.toString().includes(q)) );
+    }
+
+    if (status !== 'ALL') filteredResults = filteredResults.filter(c => (c.status || '').toUpperCase() === status.toUpperCase());
+
+    if (risk !== 'ALL') filteredResults = filteredResults.filter(c => {const score = c.risk_score ?? 0; const level = score >= 70 ? 'HIGH' : score >= 40 ? 'MEDIUM' : 'LOW'; return level === risk.toUpperCase();});
+
+    if (fromDate) filteredResults = filteredResults.filter(c => new Date(c.registrationDate) >= new Date(fromDate));
+    if (toDate) filteredResults = filteredResults.filter(c => new Date(c.registrationDate) <= new Date(toDate));
+
+    page = 1; renderTableRows(filteredResults); renderPagination(filteredResults.length,page);
+  }
+
+  function clearFilters(){document.getElementById('searchInput').value='';document.getElementById('statusFilter').value='ALL';document.getElementById('riskFilter').value='ALL';document.getElementById('fromDate').value='';document.getElementById('toDate').value='';applyFilters()}
+
+  async function fetchInitialData(){showSpinner(true);try{const data = await apiFetch(`/api/customers?page=1&limit=1000`);currentResults = data.customers || [];
+    updateDashboardStats();
+    applyFilters()}catch(err){console.error('Failed to fetch initial data',err);tbody.innerHTML = '<tr><td colspan="6" class="text-center text-danger">Failed to load customers</td></tr>'}finally{showSpinner(false)}}
+
+  let currentCustomerId = null;
+
+  async function openCustomerDetail(id){
+    currentCustomerId = id;
+    document.getElementById("customerDetailBody").innerHTML = `<div class="text-center py-4 text-muted">Loading...</div>`;
+    try{
+      const c = await apiFetch(`/api/customers/${id}`);
+      renderCustomerDetail(c);
+    }catch(e){
+      document.getElementById("customerDetailBody").innerHTML = `<div class="text-danger text-center py-4">${e.message}</div>`;
+    }
+    new bootstrap.Modal(document.getElementById("customerDetailModal")).show();
+  }
+
+  function renderCustomerDetail(c){
+    const body = document.getElementById("customerDetailBody");
+    document.getElementById("detailTitle").textContent = `Customer: ${c.customerName}`;
+
+    const docsHtml = (c.documents || []).map(d=>`<div class="border p-2 rounded mb-2"><strong>${d.type}</strong><br/><a class="btn btn-sm btn-outline-primary mt-1" href="${d.url}" target="_blank">Preview / Download</a></div>`).join('');
+
+    const historyHtml = (c.statusHistory || []).map(h=>`<div class="border-bottom py-1"><strong>${h.status}</strong> — ${formatDateTimeISOtoDDMMYYYYHHMM(h.timestamp)}<br/><small>${h.employeeEmail||''}</small><br/><em>${h.comment||''}</em></div>`).join('');
+
+    body.innerHTML = `
+      <h5 class="mb-3">Personal Information</h5>
+      <div class="row">
+        <div class="col-md-6">
+          <p><strong>Name:</strong> ${c.customerName}</p>
+          <p><strong>Email:</strong> ${c.email}</p>
+          <p><strong>Phone:</strong> ${c.phone || '-'}</p>
+          <p><strong>Address:</strong> ${c.address_line1 || '-'}, ${c.city || ''}</p>
+        </div>
+        <div class="col-md-6">
+          <p><strong>City:</strong> ${c.city || '-'}</p>
+          <p><strong>Country:</strong> ${c.country || '-'}</p>
+          <p><strong>Date of Birth:</strong> ${c.date_of_birth || '-'}</p>
+          <p><strong>Registration Date:</strong> ${formatDateTimeISOtoDDMMYYYYHHMM(c.registrationDate)}</p>
+        </div>
+      </div>
+
+      <hr/>
+      <h5>Uploaded Documents</h5>
+      ${docsHtml || "<p class='text-muted'>No documents uploaded</p>"}
+
+      <hr/>
+      <h5>Risk Score</h5>
+      <p><strong>Total Score:</strong> ${c.risk_score ?? '-'}</p>
+      <pre class="bg-light p-2 rounded">${JSON.stringify(c.risk_breakdown, null, 2)}</pre>
+
+      <hr/>
+      <h5>Status History</h5>
+      ${historyHtml || "<p class='text-muted'>No status history</p>"}
+
+      <hr/>
+      <button class="btn btn-outline-secondary" onclick="window.print()">Print / Export</button>
+    `;
+
+    // button wiring - open confirm modals instead of calling API directly
+    const status = (c.status||'').toUpperCase();
+    const isActionable = status === 'DRAFT';
+    const approveBtnEl = document.getElementById('approveBtn');
+    const rejectBtnEl = document.getElementById('rejectBtn');
+
+    approveBtnEl.disabled = !isActionable;
+    rejectBtnEl.disabled = !isActionable;
+
+    approveBtnEl.onclick = isActionable ? () => openApproveConfirm(c.id) : null;
+    rejectBtnEl.onclick = isActionable ? () => openRejectConfirm(c.id) : null;
+  }
+
+  // ---------- CONFIRM / ACTION HANDLERS ----------
+  function openApproveConfirm(id){
+    pendingCustomerForAction = id;
+    const modalEl = document.getElementById('approveConfirmModal');
+    const modal = new bootstrap.Modal(modalEl);
+    modal.show();
+  }
+
+  function openRejectConfirm(id){
+    pendingCustomerForAction = id;
+    document.getElementById('rejectReason').value = '';
+    const modalEl = document.getElementById('rejectConfirmModal');
+    const modal = new bootstrap.Modal(modalEl);
+    modal.show();
+  }
+
+  
+async function performApprove(){
+  if (!pendingCustomerForAction) return;
+  const btn = document.getElementById('confirmApproveBtn');
+  btn.disabled = true;
+  const originalBtnText = btn.textContent;
+  btn.textContent = 'Approving...';
+
+  try {
+    // 1) Primary quick approve (wait for this)
+    await apiFetch(`/api/customers/${pendingCustomerForAction}/approve`, { method: 'PUT' });
+
+    // 2) Update UI immediately (close modals, refresh visible lists)
+    try {
+      bootstrap.Modal.getInstance(document.getElementById('approveConfirmModal'))?.hide();
+    } catch(e) { /* ignore */ }
+    // refresh page data (await to ensure UI shows updated status)
+    await fetchInitialData();
+    try {
+      bootstrap.Modal.getInstance(document.getElementById('customerDetailModal'))?.hide();
+    } catch(e) { /* ignore */ }
+
+    // 3) Notify user — UI is now in a consistent state
+    alert('Customer approved');
+
+    // Save id locally before we clear pendingCustomerForAction
+    const idToFollowUp = pendingCustomerForAction;
+
+    // 4) Reset local state that controls buttons / UI (so user can keep using the app)
+    pendingCustomerForAction = null;
+    btn.disabled = false;
+    btn.textContent = originalBtnText || 'Approve';
+
+    // 5) Start the heavy follow-up in background (non-blocking) with timeout
+    (async (id) => {
+      const controller = new AbortController();
+      // safety: abort the follow-up if it doesn't respond in X ms
+      const TIMEOUT_MS = 15000; // 15s, tune to your needs
+      const timeout = setTimeout(() => {
+        controller.abort();
+      }, TIMEOUT_MS);
+
+      try {
+        console.log('[FollowUp] Starting background follow-up for', id);
+
+        // If payload tiny, you can use sendBeacon instead (unreliable for large bodies).
+        // Here we use fetch with an AbortController to avoid indefinite hangs.
+        await fetch(`/api/reviews/customers/${id}/approve`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ /* any needed payload */ }),
+          signal: controller.signal,
+          // keepalive: true  // optional: useful if page might unload; not necessary here
+        });
+
+        console.log('[FollowUp] Background follow-up finished for', id);
+      } catch (err) {
+        if (err.name === 'AbortError') {
+          console.error('[FollowUp] Background follow-up aborted due to timeout for', id);
+        } else {
+          console.error('[FollowUp] Background follow-up failed for', id, err);
+        }
+        // optionally: report to monitoring endpoint
+      } finally {
+        clearTimeout(timeout);
+      }
+    })(idToFollowUp);
+
+    // done — user can continue using the UI without refresh
+    return;
+  } catch (e) {
+    console.error('Approval failed:', e);
+    alert(e?.message || 'Approval failed');
+  } finally {
+    // ensure UI state restored in any case
+    pendingCustomerForAction = pendingCustomerForAction || null;
+    btn.disabled = false;
+    btn.textContent = originalBtnText || 'Approve';
+  }
+}
+function updateDashboardStats() {
+  const total = currentResults.length;
+
+  const pending = currentResults.filter(c => 
+    (c.status || '').toUpperCase() === 'PENDING'
+  ).length;
+
+  const highRisk = currentResults.filter(c => {
+    const score = c.risk_score ?? 0;
+    return score >= 70;
+  }).length;
+
+  // Update UI
+  document.getElementById('totalCustomers').textContent = total;
+  document.getElementById('pendingReviews').textContent = pending;
+  document.getElementById('highRisk').textContent = highRisk;
+}
+
+
+  async function performReject(){
+    if (!pendingCustomerForAction) return;
+    const reason = document.getElementById('rejectReason').value.trim();
+    if (!reason || reason.length < 10) { alert('Rejection reason must be at least 10 characters.'); return; }
+    const btn = document.getElementById('confirmRejectBtn');
+    btn.disabled = true; btn.textContent = 'Rejecting...';
+    try{
+      await apiFetch(`/api/customers/${pendingCustomerForAction}/reject`, { method: 'PUT', body: JSON.stringify({ reason }) });
+      bootstrap.Modal.getInstance(document.getElementById('rejectConfirmModal')).hide();
+      await fetchInitialData();
+      bootstrap.Modal.getInstance(document.getElementById('customerDetailModal'))?.hide();
+      alert('Customer rejected');
+    }catch(e){
+      alert(e.message);
+    }finally{
+      btn.disabled = false; btn.textContent = 'Reject';
+      pendingCustomerForAction = null;
+    }
+  }
+
+  /* ---------------- CLICK HANDLER FOR VIEW DETAILS ---------------- */
+  document.addEventListener('click', e=>{
+    if (e.target.classList.contains('view-btn') || e.target.closest('.view-btn')){
+      const el = e.target.closest('button')||e.target;
+      const tr = el.closest('tr');
+      const id = tr?.dataset?.id;
+      if (id) openCustomerDetail(id);
+    }
+  });
+
+  // wire confirm modal buttons
+  document.getElementById('confirmApproveBtn').addEventListener('click', performApprove);
+  document.getElementById('confirmRejectBtn').addEventListener('click', performReject);
+
+  /* ---------------- EVENT LISTENERS ---------------- */
+  document.getElementById('clearSearch').addEventListener('click', clearFilters);
+  document.getElementById('searchInput').addEventListener('input', ()=>{clearTimeout(window.searchTimer);window.searchTimer=setTimeout(applyFilters,300)});
+  document.getElementById('statusFilter').addEventListener('change', applyFilters);
+  document.getElementById('riskFilter').addEventListener('change', applyFilters);
+  document.getElementById('fromDate').addEventListener('change', applyFilters);
+  document.getElementById('toDate').addEventListener('change', applyFilters);
+
+  // expose for inline handlers
+  window.applyFilters = applyFilters;
+  window.clearFilters = clearFilters;
+
+  // initial fetch
+  fetchInitialData();
+
+})();
+</script>
+</body>
+</html>
