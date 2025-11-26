@@ -12,7 +12,7 @@ const app = express();
 
 // Basic middleware
 const corsOptions = {
-  origin: 'https://client-onboarding-frontend.vercel.app', // frontend URL
+  origin: 'https://client-onboarding-9xa0jb4pn-shahzaib1044s-projects.vercel.app', // frontend URL
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   credentials: true, // if you use cookies
 };
