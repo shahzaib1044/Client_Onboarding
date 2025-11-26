@@ -9,7 +9,7 @@ const { registerRoutes } = require('./routes');
 const serverless = require('serverless-http');
 
 const app = express();
-
+app.set('trust proxy', 1);
 // ------------------------
 // CORS Setup
 // ------------------------
