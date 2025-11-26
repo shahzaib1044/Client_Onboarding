@@ -188,7 +188,7 @@
 
       <div class="footer-text">
         Don't have an account?
-        <a href="register.html">Sign up</a>
+        <a href="/Customer/register.html">Sign up</a>
       </div>
     </form>
   </div>
@@ -252,7 +252,7 @@ form.addEventListener('submit', async (e) => {
     showToast('Logged in successfully', 'success');
 
      if (role.toUpperCase() === 'CUSTOMER') {
-        window.location.href = 'Customer_Dashboard.html'; // change to your actual customer dashboard URL
+        window.location.href = '/Customer/Customer_Dashboard.html'; // change to your actual customer dashboard URL
       } else if (role.toUpperCase() === 'EMPLOYEE') {
         window.location.href = 'Employee_Dashboard.html'; // change to your actual employee dashboard URL
       }
