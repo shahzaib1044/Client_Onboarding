@@ -13,15 +13,34 @@ app.set('trust proxy', 1);
 // ------------------------
 // CORS Setup
 // ------------------------
+// ------------------------
+// CORS Setup
+// ------------------------
+const allowedOrigins = [
+  'https://client-onboarding-frontend.vercel.app',
+  'http://localhost:3000', // optional for local dev
+];
+
 const corsOptions = {
-  origin: '*',  
-  methods: ['GET','POST','PUT','DELETE','OPTIONS'],
+  origin: function(origin, callback) {
+    // allow requests with no origin (like mobile apps or curl)
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  methods: ['GET','POST','PUT','DELETE','OPTIONS','PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
 };
 
-// Apply CORS globally (handles OPTIONS automatically)
 app.use(cors(corsOptions));
+
+// Handle preflight requests manually just in case
+app.options('*', cors(corsOptions));
 
 // ------------------------
 // Body parser & cookies
