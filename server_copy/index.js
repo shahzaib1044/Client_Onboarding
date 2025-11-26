@@ -14,7 +14,7 @@ app.set('trust proxy', 1);
 // CORS Setup
 // ------------------------
 const corsOptions = {
-  origin: 'https://client-onboarding-frontend.vercel.app',
+  origin: '*',  
   methods: ['GET','POST','PUT','DELETE','OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
