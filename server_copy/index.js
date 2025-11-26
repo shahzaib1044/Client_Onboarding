@@ -11,7 +11,14 @@ const serverless = require("serverless-http");
 const app = express();
 
 // Basic middleware
-app.use(cors());
+const corsOptions = {
+  origin: 'https://client-onboarding-frontend.vercel.app', // frontend URL
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  credentials: true, // if you use cookies
+};
+
+app.use(cors(corsOptions));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
