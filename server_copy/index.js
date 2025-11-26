@@ -11,14 +11,21 @@ const serverless = require("serverless-http");
 const app = express();
 
 // Basic middleware
+
+
+// Allow your frontend domain
 const corsOptions = {
-  origin: 'https://client-onboarding-frontend.vercel.app', // your frontend URL
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  credentials: true // if you use cookies/auth
+  origin: 'https://client-onboarding-frontend.vercel.app',
+  methods: ['GET','POST','PUT','DELETE','OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'], // add any headers your frontend uses
+  credentials: true
 };
 
+// Apply CORS middleware globally
 app.use(cors(corsOptions));
-app.options('*', cors(corsOptions)); // handle preflight requests
+
+// Handle preflight OPTIONS requests for all routes
+app.options('*', cors(corsOptions));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
