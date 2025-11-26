@@ -69,6 +69,9 @@ if (enableCsrf) {
     res.json({ csrfToken: req.csrfToken() });
   });
 }
+app.get('/', (req, res) => {
+  res.json({ message: 'Server is running!' });
+});
 
 // Basic health check
 app.get('/health', (req, res) => res.json({ status: 'ok', time: new Date().toISOString() }));
