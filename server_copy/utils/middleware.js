@@ -5,25 +5,25 @@ const SECRET = process.env.JWT_SECRET || 'supersecret123';
 /**
  * ✅ requireAuth: verifies your own JWT token and attaches req.user
  */
-async function requireAuth(req, res, next) {
-  try {
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({ message: 'Unauthorized' });
-    }
+function requireAuth(req, res, next) {
+  if (req.method === 'OPTIONS') return next(); // allow preflight
 
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
+
+  try {
     const token = authHeader.split(' ')[1];
     const decoded = jwt.verify(token, SECRET);
-
-    // attach user info from token
-    req.user = decoded; // { id, email, role }
-
-    return next();
+    req.user = decoded;
+    next();
   } catch (err) {
     console.error('auth error', err);
     return res.status(401).json({ message: 'Unauthorized' });
   }
 }
+
 
 /**
  * ✅ requireRole: checks user role from token
