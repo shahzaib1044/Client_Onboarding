@@ -6,7 +6,7 @@
     { "source": "/Employee/:path*", "destination": "/Employee/:path*" },
     {
       "source": "/api/:path*", 
-      "destination": "https://client-onboarding-9xa0jb4pn-shahzaib1044s-projects.vercel.app/api/:path*"
+      "destination": "https://client-onboarding-84jx8u9fl-shahzaib1044s-projects.vercel.app/api/:path*"
     }
   ]
 }
