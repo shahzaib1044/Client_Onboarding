@@ -2,11 +2,11 @@
   "rewrites": [
     {
       "source": "/Employee/api/:path*",
-      "destination": "https://client-onboarding-84jx8u9fl-shahzaib1044s-projects.vercel.app/api/:path*"
+      "destination": "https://client-onboarding-fazaa2e2m-shahzaib1044s-projects.vercel.app/api/:path*"
     },
     {
       "source": "/api/:path*",
-      "destination": "https://client-onboarding-84jx8u9fl-shahzaib1044s-projects.vercel.app/api/:path*"
+      "destination": "https://client-onboarding-fazaa2e2m-shahzaib1044s-projects.vercel.app/api/:path*"
     },
     { "source": "/(.*)", "destination": "/Customer/login.html" },
     { "source": "/Customer/:path*", "destination": "/Customer/:path*" },
