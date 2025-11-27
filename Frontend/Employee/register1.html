@@ -402,7 +402,7 @@ const payload = {
         registerBtn.textContent = 'Registering...';
 
         try {
-          const res = await fetch('https://client-onboarding-9xa0jb4pn-shahzaib1044s-projects.vercel.app/api/auth/register', {
+          const res = await fetch('api/auth/register', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)

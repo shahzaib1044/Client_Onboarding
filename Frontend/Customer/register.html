@@ -492,7 +492,7 @@
 
     // Email
 async function checkEmailUnique(email) {
-  const res = await fetch(`https://client-onboarding-9xa0jb4pn-shahzaib1044s-projects.vercel.app/api/auth/check-email?email=${encodeURIComponent(email)}`);
+  const res = await fetch(`api/auth/check-email?email=${encodeURIComponent(email)}`);
   const data = await res.json();
   if (data.exists) {
     errors.emailError.textContent = 'Email already in use';
@@ -506,7 +506,7 @@ async function checkEmailUnique(email) {
 
 // ID
 async function checkIdUnique(idNumber) {
-  const res = await fetch(`https://client-onboarding-9xa0jb4pn-shahzaib1044s-projects.vercel.app/api/auth/check-id?id_number=${encodeURIComponent(idNumber)}`);
+  const res = await fetch(`api/auth/check-id?id_number=${encodeURIComponent(idNumber)}`);
   const data = await res.json();
   if (data.exists) {
     errors.idNumberError.textContent = 'ID Number already in use';
@@ -579,7 +579,7 @@ async function checkIdUnique(idNumber) {
 
       try {
         // POST to registration endpoint (use your provided endpoint)
-        const res = await fetch('https://client-onboarding-9xa0jb4pn-shahzaib1044s-projects.vercel.app/api/auth/register', {
+        const res = await fetch('api/auth/register', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
@@ -601,7 +601,7 @@ async function checkIdUnique(idNumber) {
           // Log registration event (console + API audit)
           console.info('Registration event', { email: payload.email, reference, ts });
           // OPTIONAL: post audit log to server
-          navigator.sendBeacon?.('https://client-onboarding-9xa0jb4pn-shahzaib1044s-projects.vercel.app/api/audit/log', JSON.stringify({ event: 'REGISTER', email: payload.email, reference, timestamp: ts }));
+          navigator.sendBeacon?.('api/audit/log', JSON.stringify({ event: 'REGISTER', email: payload.email, reference, timestamp: ts }));
 
           // redirect to dashboard after 3 seconds
           setTimeout(() => {

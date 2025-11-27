@@ -4,6 +4,11 @@
       "source": "/Employee/api/:path*",
       "destination": "https://client-onboarding-pi-two.vercel.app/api/:path*"
     },
+     {
+      "source": "/Customer/api/:path*",
+      "destination": "https://client-onboarding-pi-two.vercel.app/api/:path*"
+    },
+    
     {
       "source": "/api/:path*",
       "destination": "https://client-onboarding-pi-two.vercel.app/api/:path*"
