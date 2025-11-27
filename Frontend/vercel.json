@@ -1,6 +1,6 @@
 {
   "rewrites": [
-    { "source": "/Customer", "destination": "/Customer/login.html" },
+    { "source": "/(.*)", "destination": "/Customer/login.html" },
     { "source": "/Customer/:path*", "destination": "/Customer/:path*" },
     { "source": "/Employee", "destination": "/Employee/login.html" },
     { "source": "/Employee/:path*", "destination": "/Employee/:path*" }
