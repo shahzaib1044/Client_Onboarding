@@ -202,6 +202,9 @@ router.get('/upcoming', requireAuth, requireRole('EMPLOYEE'), async (req, res) =
   try {
     const { from, to } = req.query;
 
+    // Convert today to YYYY-MM-DD (works for both DATE and TIMESTAMP columns)
+    const today = new Date().toISOString().split("T")[0];
+
     let query = supabaseAdmin
       .from('reviews')
       .select(`
@@ -220,8 +223,14 @@ router.get('/upcoming', requireAuth, requireRole('EMPLOYEE'), async (req, res) =
       `)
       .order('scheduled_date', { ascending: true });
 
-    // Apply date filter only if user provides from/to
-    if (from) query = query.gte('scheduled_date', from);
+    // If user doesn't provide "from", default from = today
+    if (from) {
+      query = query.gte('scheduled_date', from);
+    } else {
+      query = query.gte('scheduled_date', today);
+    }
+
+    // Apply "to" only if user provided it
     if (to) query = query.lte('scheduled_date', to);
 
     const { data, error } = await query;
@@ -235,12 +244,13 @@ router.get('/upcoming', requireAuth, requireRole('EMPLOYEE'), async (req, res) =
   }
 });
 
+
 // GET /api/reviews/overdue
 router.get('/overdue', requireAuth, requireRole('EMPLOYEE'), async (req, res) => {
   try {
-    const today = toDateOnlyISO(new Date());
+    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD only
 
-    const { data, error } = await supabaseAdmin
+    let query = supabaseAdmin
       .from('reviews')
       .select(`
         id,
@@ -250,18 +260,19 @@ router.get('/overdue', requireAuth, requireRole('EMPLOYEE'), async (req, res) =>
         status,
         next_review_date,
         notes,
-       
         customer:customer_id (
           id,
           first_name,
           last_name
         )
       `)
-      .lt('scheduled_date', today)
-      .eq('status', 'DRAFT')
+      .lt('scheduled_date', today)   // Overdue = scheduled_date < today
       .order('scheduled_date', { ascending: true });
 
+    const { data, error } = await query;
+
     if (error) throw error;
+
     res.json({ reviews: data || [] });
   } catch (err) {
     console.error('GET /reviews/overdue error', err);

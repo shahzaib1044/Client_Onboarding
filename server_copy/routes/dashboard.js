@@ -12,6 +12,7 @@ function parseDateSafe(d) {
   return dt.isValid() ? dt.startOf('day') : null;
 }
 
+// Map score to risk level
 function computeRiskLevelFromScore(score) {
   if (score === null || typeof score === 'undefined') return 'UNKNOWN';
   if (score >= 70) return 'HIGH';
@@ -19,18 +20,19 @@ function computeRiskLevelFromScore(score) {
   return 'LOW';
 }
 
-// GET /api/dashboard/statistics?from=&to=
 router.get('/statistics', requireAuth, requireRole('EMPLOYEE'), async (req, res) => {
   try {
     const qFrom = parseDateSafe(req.query.from);
     const qTo = parseDateSafe(req.query.to);
     const now = dayjs();
 
-    // default: last 6 months
-    const to = qTo || now.endOf('day');
-    const from = qFrom || now.subtract(6, 'month').startOf('day');
+   const from = qFrom || now.subtract(6, 'month').startOf('day');
+const to = qTo || now.endOf('day');  // ensures all up to current time
 
-    // 1) Fetch customers in date range (for totals + trends + status counts)
+
+    console.log(`[INFO] Fetching dashboard statistics from ${from.toISOString()} to ${to.toISOString()}`);
+
+    // 1) Fetch customers in date range
     const { data: customers, error: custErr } = await supabaseAdmin
       .from('customers')
       .select('id,status,created_at')
@@ -38,28 +40,36 @@ router.get('/statistics', requireAuth, requireRole('EMPLOYEE'), async (req, res)
       .lte('created_at', to.toISOString());
 
     if (custErr) {
-      console.error('Error fetching customers:', custErr);
+      console.error('[ERROR] Fetching customers failed:', custErr);
       await auditLog(req, 'GET_STATISTICS', 'DASHBOARD', null, 'FAILURE', custErr.message);
       return res.status(500).json({ message: 'Failed fetching customers' });
     }
 
     const rows = customers || [];
+    console.log(`[INFO] Fetched ${rows.length} customers`);
+
+    // Log unique statuses for debugging
+    console.log('[INFO] Unique customer statuses:', [...new Set(rows.map(r => r.status))]);
+
     const totalApplications = rows.length;
-    const pending = rows.filter(r => (r.status || '').toUpperCase() === 'PENDING').length;
+
+    // Count applications by status
+    const pending = rows.filter(r => (r.status || '').toUpperCase() === 'DRAFT').length;
     const approved = rows.filter(r => (r.status || '').toUpperCase() === 'APPROVED').length;
     const rejected = rows.filter(r => (r.status || '').toUpperCase() === 'REJECTED').length;
     const approvalRate = totalApplications === 0 ? 0 : Math.round((approved / totalApplications) * 10000) / 100;
 
-    // 2) Risk distribution: fetch latest risk_scores per customer and compute level from score
+    console.log('[INFO] Application counts:', { totalApplications, pending, approved, rejected, approvalRate });
+
+    // 2) Risk distribution
     const customerIds = rows.map(r => r.id).filter(Boolean);
-    // Prepare defaults
     let riskDistribution = {
       low: { count: 0, percent: 0 },
       medium: { count: 0, percent: 0 },
       high: { count: 0, percent: 0 },
       unknown: { count: 0, percent: 0 }
     };
-    let riskDetails = []; // array of { customer_id, risk_score, risk_level, calculated_at }
+    let riskDetails = [];
 
     if (customerIds.length > 0) {
       const { data: riskRows, error: riskErr } = await supabaseAdmin
@@ -67,63 +77,52 @@ router.get('/statistics', requireAuth, requireRole('EMPLOYEE'), async (req, res)
         .select('customer_id, score, calculated_at')
         .in('customer_id', customerIds);
 
-      if (riskErr) {
-        console.error('Error fetching risk_scores:', riskErr);
-        // continue with defaults (zero distribution)
-      } else {
-        // pick latest risk_scores per customer by calculated_at
-        const latestByCustomer = {};
-        (riskRows || []).forEach(r => {
-          const cid = r.customer_id;
-          const calc = r.calculated_at ? dayjs(r.calculated_at) : null;
-          if (!cid) return;
-          if (!latestByCustomer[cid]) latestByCustomer[cid] = r;
-          else {
-            const existingCalc = latestByCustomer[cid].calculated_at ? dayjs(latestByCustomer[cid].calculated_at) : null;
-            if (calc && existingCalc) {
-              if (calc.isAfter(existingCalc)) latestByCustomer[cid] = r;
-            } else if (calc && !existingCalc) {
-              latestByCustomer[cid] = r;
-            }
-          }
-        });
+      if (riskErr) console.error('[ERROR] Fetching risk scores failed:', riskErr);
+      else console.log(`[INFO] Fetched ${riskRows.length} risk scores`);
 
-        // Build riskDetails and distribution counters using the score -> level mapping
-        const counters = { LOW: 0, MEDIUM: 0, HIGH: 0, UNKNOWN: 0 };
-
-        // For each customer in the requested set, if no risk row found mark UNKNOWN
-        for (const cid of customerIds) {
-          const r = latestByCustomer[cid];
-          const score = r && (typeof r.score !== 'undefined' && r.score !== null) ? Number(r.score) : null;
-          const level = computeRiskLevelFromScore(score);
-          if (level === 'HIGH') counters.HIGH++;
-          else if (level === 'MEDIUM') counters.MEDIUM++;
-          else if (level === 'LOW') counters.LOW++;
-          else counters.UNKNOWN++;
-
-          riskDetails.push({
-            customer_id: cid,
-            risk_score: score,
-            risk_level: level,
-            calculated_at: r ? r.calculated_at : null
-          });
+      // Pick latest risk score per customer
+      const latestByCustomer = {};
+      (riskRows || []).forEach(r => {
+        const cid = r.customer_id;
+        const calc = r.calculated_at ? dayjs(r.calculated_at) : null;
+        if (!cid) return;
+        if (!latestByCustomer[cid]) latestByCustomer[cid] = r;
+        else {
+          const existingCalc = latestByCustomer[cid].calculated_at ? dayjs(latestByCustomer[cid].calculated_at) : null;
+          if (calc && (!existingCalc || calc.isAfter(existingCalc))) latestByCustomer[cid] = r;
         }
+      });
 
-        const denom = totalApplications === 0 ? 1 : totalApplications;
-        riskDistribution = {
-          low: { count: counters.LOW, percent: Math.round((counters.LOW / denom) * 10000) / 100 },
-          medium: { count: counters.MEDIUM, percent: Math.round((counters.MEDIUM / denom) * 10000) / 100 },
-          high: { count: counters.HIGH, percent: Math.round((counters.HIGH / denom) * 10000) / 100 },
-          unknown: { count: counters.UNKNOWN, percent: Math.round((counters.UNKNOWN / denom) * 10000) / 100 }
-        };
+      const counters = { LOW: 0, MEDIUM: 0, HIGH: 0, UNKNOWN: 0 };
+      for (const cid of customerIds) {
+        const r = latestByCustomer[cid];
+        const score = r && r.score != null ? Number(r.score) : null;
+        const level = computeRiskLevelFromScore(score);
+        counters[level] = (counters[level] || 0) + 1;
+
+        riskDetails.push({
+          customer_id: cid,
+          risk_score: score,
+          risk_level: level,
+          calculated_at: r ? r.calculated_at : null
+        });
       }
+
+      const denom = totalApplications === 0 ? 1 : totalApplications;
+      riskDistribution = {
+        low: { count: counters.LOW, percent: Math.round((counters.LOW / denom) * 10000) / 100 },
+        medium: { count: counters.MEDIUM, percent: Math.round((counters.MEDIUM / denom) * 10000) / 100 },
+        high: { count: counters.HIGH, percent: Math.round((counters.HIGH / denom) * 10000) / 100 },
+        unknown: { count: counters.UNKNOWN, percent: Math.round((counters.UNKNOWN / denom) * 10000) / 100 }
+      };
+
+      console.log('[INFO] Risk distribution:', riskDistribution);
     }
 
-    // 3) trendsData: group by month (YYYY-MM) using customers.created_at
+    // 3) Trends per month
     const months = [];
-    const start = dayjs(from).startOf('month');
+    let cursor = dayjs(from).startOf('month');
     const end = dayjs(to).endOf('month');
-    let cursor = start.clone();
     while (cursor.isBefore(end) || cursor.isSame(end)) {
       months.push(cursor.format('YYYY-MM'));
       cursor = cursor.add(1, 'month');
@@ -139,7 +138,9 @@ router.get('/statistics', requireAuth, requireRole('EMPLOYEE'), async (req, res)
       return { period: m, count };
     });
 
-    // 4) overdueReviews: reviews where next_review_date < now AND status != 'COMPLETED'
+    console.log('[INFO] Trends data:', trendsData);
+
+    // 4) Overdue reviews
     const nowISO = dayjs().toISOString();
     const { data: overdueRows, error: overdueErr } = await supabaseAdmin
       .from('reviews')
@@ -148,10 +149,10 @@ router.get('/statistics', requireAuth, requireRole('EMPLOYEE'), async (req, res)
       .neq('status', 'COMPLETED');
 
     let overdueReviews = 0;
-    if (overdueErr) {
-      console.error('Error fetching overdue reviews:', overdueErr);
-    } else {
+    if (overdueErr) console.error('[ERROR] Fetching overdue reviews failed:', overdueErr);
+    else {
       overdueReviews = (overdueRows || []).length;
+      console.log('[INFO] Overdue reviews count:', overdueReviews);
     }
 
     const result = {
@@ -161,17 +162,20 @@ router.get('/statistics', requireAuth, requireRole('EMPLOYEE'), async (req, res)
       rejected,
       approvalRate,
       riskDistribution,
-      riskDetails,   // <-- per-customer computed risk_score & risk_level
+      riskDetails,
       trendsData,
       overdueReviews,
       from: from.toISOString(),
       to: to.toISOString()
     };
 
+    console.log('[INFO] Returning statistics result');
+
     await auditLog(req, 'GET_STATISTICS', 'DASHBOARD', null, 'SUCCESS');
     return res.json(result);
+
   } catch (err) {
-    console.error('GET /statistics error', err);
+    console.error('[ERROR] GET /statistics error:', err);
     try { await auditLog(req, 'GET_STATISTICS', 'DASHBOARD', null, 'FAILURE', err.message); } catch (_) {}
     return res.status(500).json({ message: 'Failed to fetch statistics' });
   }
