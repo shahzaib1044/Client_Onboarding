@@ -106,14 +106,13 @@
         <div class="d-flex align-items-center mb-3 gap-3">
           <div class="avatar">S</div>
           <div>
-            <div id=userName1 class="fw-bold"></div>
+            <div id="userName1" class="fw-bold"></div>
             <small class="muted">Product & Support</small>
           </div>
         </div>
 
         <nav class="nav flex-column mb-3">
           <a class="nav-link " href="Dashboard.html"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a>
-          
           <a class="nav-link" href="Review.html"><i class="bi bi-gear me-2"></i>Review</a>
           <a class="nav-link" href="Statistics.html"><i class="bi bi-graph-up me-2"></i>Statistics</a>
         </nav>
@@ -167,7 +166,6 @@
             </div>
           </div>
 
-          <!-- optional extra items -->
           <div class="d-flex flex-column gap-2 mt-3">
             <!-- additional sidebar items here -->
           </div>
@@ -185,8 +183,14 @@
             </div>
             <div>
               <div class="btn-group" role="group">
-                <button class="btn btn-outline-primary" id="tabUpcoming">Upcoming</button>
-                <button class="btn btn-outline-secondary" id="tabOverdue">Overdue</button>
+               <button id="btnUpcoming" class="btn btn-outline-primary" >
+  Upcoming
+</button>
+
+<button id="btnOverdue" class="btn btn-outline-secondary">
+  Overdue
+</button>
+
               </div>
             </div>
           </div>
@@ -195,7 +199,10 @@
         <!-- filters + table card -->
         <div class="card card-rounded p-0">
           <div class="p-3 border-bottom d-flex flex-wrap justify-content-between align-items-center gap-2">
-            <div class="fw-bold" id="tableTitle">Upcoming Reviews</div>
+            <div class="fw-bold d-flex align-items-center gap-3">
+              <div id="tableTitle">Upcoming Reviews</div>
+              <small class="muted" id="reviewCount" aria-live="polite">0</small>
+            </div>
 
             <div class="muted small d-flex align-items-center gap-2">
               <label class="mb-0 small">From</label>
@@ -268,93 +275,118 @@
     </div>
   </div>
 
-
-
 <script>
-(() => {
+document.addEventListener('DOMContentLoaded', () => {
   const API_BASE = '';
- 
-  let currentTab = 'upcoming';
-  let currentList = [];
- const TOKEN_KEY = 'token';
+  const TOKEN_KEY = 'token';
   const SESSION_KEY = 'loginTime';
   const MAX_SESSION_DURATION = 30 * 60 * 1000; // 30 min
-  function getToken(){return localStorage.getItem(TOKEN_KEY)}
+
   // DOM elements
   const reviewsTbody = document.getElementById('reviewsTbody');
-  const reviewCountEl = document.getElementById('reviewCount') || (() => {
-    // create small display if missing
-    const span = document.createElement('span');
-    span.id = 'reviewCount';
-    return span;
-  })();
   const tableTitle = document.getElementById('tableTitle');
   const applyFilterBtn = document.getElementById('applyFilterBtn');
   const filterFrom = document.getElementById('filterFrom');
   const filterTo = document.getElementById('filterTo');
   const presetDays = document.getElementById('presetDays');
   const loadingSpinner = document.getElementById('loadingSpinner');
+  const userNameEl = document.getElementById("userName");
+  const userNameE2 = document.getElementById("userName1");
+  const userEmailEl = document.getElementById('userEmail');
+  const logoutBtn = document.getElementById('logoutBtn');
+  const btnUpcoming = document.getElementById('btnUpcoming');
+  const btnOverdue = document.getElementById('btnOverdue');
+  const btnScheduler = document.getElementById('btnScheduler');
+  const confirmCompleteBtn = document.getElementById('confirmCompleteBtn');
+  const reviewCountEl = document.getElementById('reviewCount');
 
-  // page controls
-  document.getElementById('tabUpcoming').addEventListener('click', ()=>loadTab('upcoming', true));
-  document.getElementById('tabOverdue').addEventListener('click', ()=>loadTab('overdue', true));
-  document.getElementById('btnScheduler').addEventListener('click', runScheduler);
-  document.getElementById('confirmCompleteBtn').addEventListener('click', confirmComplete);
-  applyFilterBtn.addEventListener('click', ()=>loadTab(currentTab, true));
-  presetDays.addEventListener('change', onPresetChange);
+  let currentTab = 'upcoming';
+  let currentList = [];
 
-const userNameEl = document.getElementById("userName");
-   const userNameE2 = document.getElementById("userName1");
+  function getToken(){ return localStorage.getItem(TOKEN_KEY); }
 
-const token = getToken();
+  // Safe parse token payload (returns null if not available or invalid)
+  function safeParseTokenPayload() {
+    const token = getToken();
+    if (!token) return null;
+    try {
+      const parts = token.split('.');
+      if (parts.length < 2) return null;
+      const payloadJson = atob(parts[1].replace(/-/g, '+').replace(/_/g, '/'));
+      return JSON.parse(payloadJson);
+    } catch (e) {
+      console.warn('Failed to parse token payload', e);
+      return null;
+    }
+  }
 
-  async function apiFetch(endpoint, options = {}){
+  // Generic API fetch that enforces session and auth header
+  async function apiFetch(endpoint, options = {}) {
     const token = getToken();
     const loginTime = localStorage.getItem(SESSION_KEY);
 
-    if (!token || !loginTime || Date.now() - loginTime > MAX_SESSION_DURATION) {
+    if (!token || !loginTime || (Date.now() - loginTime > MAX_SESSION_DURATION)) {
+      // session missing/expired
       alert('Session expired. Please log in again.');
-      window.location.reload();
+      // clear session data and redirect to login
+      localStorage.removeItem(TOKEN_KEY);
+      localStorage.removeItem(SESSION_KEY);
+      window.location.href = 'login.html';
       return;
     }
-
+    // refresh session timestamp
     localStorage.setItem(SESSION_KEY, Date.now());
+
+    const headers = {
+      'Content-Type': 'application/json',
+      ...(options.headers || {})
+    };
+    if (token) headers['Authorization'] = 'Bearer ' + token;
 
     const res = await fetch(`${API_BASE}${endpoint}`, {
       ...options,
-      headers: {
-        'Content-Type': 'application/json',
-        ...(options.headers || {}),
-        'Authorization': `Bearer ${token}`
-      }
+      headers
     });
 
     if (!res.ok) {
-      const error = await res.json().catch(() => ({}));
-      throw new Error(error.message || 'API request failed');
+      // try to parse json error
+      const text = await res.text().catch(()=>null);
+      let parsed;
+      try { parsed = JSON.parse(text); } catch(e){ parsed = null; }
+      const errMsg = (parsed && parsed.message) ? parsed.message : text || 'API request failed';
+      const err = new Error(errMsg);
+      err.status = res.status;
+      throw err;
     }
-
-    return res.json();
+    // if no content
+    if (res.status === 204) return null;
+    return res.json().catch(()=>null);
   }
+
   /* ========= Logout ========= */
-async function logout() {
-  // remove token + session data
-  localStorage.removeItem(TOKEN_KEY);
-  localStorage.removeItem(SESSION_KEY);
-  localStorage.removeItem('userId');
-  window.location.href = 'login.html';
-}
-  const userEmailEl = document.getElementById('userEmail');
-const payload = JSON.parse(atob(token.split('.')[1]));
-    userEmailEl.textContent = payload.email
-    const username = payload.email ? payload.email.split('@')[0] : '';
-    
-   userNameEl.textContent = username
-   userNameE2.textContent = username
+  function logout() {
+    localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(SESSION_KEY);
+    localStorage.removeItem('userId');
+    window.location.href = 'login.html';
+  }
+  logoutBtn && logoutBtn.addEventListener('click', logout);
+
+  // Fill user info if token present
+  const payload = safeParseTokenPayload();
+  if (payload && payload.email) {
+    userEmailEl.textContent = payload.email;
+    const username = payload.email.split('@')[0];
+    userNameEl.textContent = username;
+    userNameE2.textContent = username;
+  } else {
+    // fallback if not logged in: keep default UI but don't crash
+    userEmailEl.textContent = 'user@example.com';
+  }
+
   function onPresetChange(){
     const days = presetDays.value;
     if (!days) return;
-    // compute from = today (UTC), to = today + days
     const now = new Date();
     const todayUtc = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
     const toUtc = new Date(todayUtc.getTime() + parseInt(days,10) * 24 * 60 * 60 * 1000);
@@ -396,20 +428,20 @@ const payload = JSON.parse(atob(token.split('.')[1]));
   // Render a single row safely (no innerHTML with DB data)
   function renderRow(r){
     const tr = document.createElement('tr');
-    const days = daysDiffFromToday(r.scheduled_date);
+    const days = daysDiffFromToday(r.scheduled_date || r.next_review_date);
     const firstName = r.customer && r.customer.first_name ? r.customer.first_name : '';
     const lastName = r.customer && r.customer.last_name ? r.customer.last_name : '';
-    const custName = (firstName || lastName) ? `${firstName} ${lastName}`.trim() : (r.customer_id || 'N/A');
+    const custName = (firstName || lastName) ? `${firstName} ${lastName}`.trim() : (r.customer_name || r.customer_id || 'N/A');
 
     // columns
     const tdName = document.createElement('td');
     tdName.textContent = custName;
 
     const tdLast = document.createElement('td');
-    tdLast.textContent = r.completed_date || '-';
+    tdLast.textContent = r.completed_date || r.last_review_date || '-';
 
     const tdNext = document.createElement('td');
-    tdNext.textContent = r.scheduled_date || (r.next_review_date || '-');
+    tdNext.textContent = r.scheduled_date || r.next_review_date || '-';
 
     const tdDays = document.createElement('td');
     tdDays.appendChild(createBadge(days));
@@ -418,6 +450,7 @@ const payload = JSON.parse(atob(token.split('.')[1]));
     tdActions.className = 'text-end';
     const btn = document.createElement('button');
     btn.className = 'btn btn-sm btn-success complete-review';
+    btn.type = 'button';
     btn.dataset.reviewId = r.id;
     btn.textContent = 'Complete';
     tdActions.appendChild(btn);
@@ -444,168 +477,153 @@ const payload = JSON.parse(atob(token.split('.')[1]));
     currentList = list;
     // attach handlers
     document.querySelectorAll('.complete-review').forEach(b => {
-      b.addEventListener('click', e => openCompleteModal(e.currentTarget.dataset.reviewId));
+      b.removeEventListener('click', completeHandler); // safe removal if previously attached
+      b.addEventListener('click', completeHandler);
     });
+  }
+
+  // detachable handler so we can remove it if needed
+  function completeHandler(e) {
+    const id = e.currentTarget.dataset.reviewId;
+    openCompleteModal(id);
   }
 
   // Helper: builds query params for upcoming endpoint
-  function buildUpcomingParams(useFilters) {
-    const params = new URLSearchParams();
-    if (useFilters) {
-      const f = filterFrom.value;
-      const t = filterTo.value;
-      if (f) params.set('from', f);
-      if (t) params.set('to', t);
-      // optionally you could allow status override:
-      // params.set('status', 'SCHEDULED');
-    } else {
-      // default to 30 days
-      params.set('days', '365');
-    }
-    return params.toString();
-  }
-
-  async function loadTab(tab, useFilters = false){
-  currentTab = tab;
-  tableTitle.textContent = tab === 'upcoming' ? 'Upcoming Reviews' : 'Overdue Reviews';
-  const token = localStorage.getItem(TOKEN_KEY);
-
-  // Build query only if filters are being applied
-  let query = '';
-  if (useFilters) {
+  function buildParamsFromFilters() {
     const params = new URLSearchParams();
     if (filterFrom.value) params.set('from', filterFrom.value);
     if (filterTo.value) params.set('to', filterTo.value);
-    query = params.toString();
+    return params.toString();
   }
 
-  applyFilterBtn.disabled = true;
-  loadingSpinner.classList.remove('d-none');
+  async function loadTab(tab, useFilters = false) {
+    currentTab = tab;
 
-  try {
-    const url = query ? `${API_BASE}/api/reviews/upcoming?${query}` : `${API_BASE}/api/reviews/upcoming`;
-    const res = await fetch(url, {
-      headers: token ? { 'Authorization': 'Bearer ' + token } : {}
-    });
-    if (!res.ok) throw new Error('Failed to fetch reviews');
+    // Update title and active button UI
+    tableTitle.textContent = tab === 'upcoming' ? 'Upcoming Reviews' : 'Overdue Reviews';
 
-    const json = await res.json();
-    let reviews = json.reviews || [];
+    btnUpcoming.classList.toggle('active', tab === 'upcoming');
+    btnOverdue.classList.toggle('active', tab === 'overdue');
 
-    // If 'Overdue' tab, filter client-side
-    if (tab === 'overdue') {
-      const todayUTC = new Date();
-      todayUTC.setUTCHours(0,0,0,0);
-      reviews = reviews.filter(r => r.scheduled_date && new Date(r.scheduled_date+'T00:00:00Z') < todayUTC);
+    applyFilterBtn.disabled = true;
+    loadingSpinner.classList.remove('d-none');
+
+    try {
+      let endpoint;
+      let query = '';
+      if (tab === 'upcoming') {
+        endpoint = '/api/reviews/upcoming';
+        if (useFilters) query = buildParamsFromFilters();
+      } else {
+        endpoint = '/api/reviews/overdue';
+        if (useFilters) query = buildParamsFromFilters();
+      }
+      const full = query ? `${endpoint}?${query}` : endpoint;
+      const json = await apiFetch(full, { method: 'GET' });
+      const reviews = (json && json.reviews) ? json.reviews : (Array.isArray(json) ? json : []);
+      renderList(reviews);
+    } catch (e) {
+      console.error('loadTab error', e);
+      reviewsTbody.innerHTML = '<tr><td colspan="5">Failed to load reviews.</td></tr>';
+      if (reviewCountEl) reviewCountEl.textContent = '0';
+    } finally {
+      applyFilterBtn.disabled = false;
+      loadingSpinner.classList.add('d-none');
+    }
+  }
+
+  async function loadOverdueReviews() {
+    // convenience wrapper
+    await loadTab('overdue', true);
+  }
+
+  async function openCompleteModal(reviewId){
+    document.getElementById('completeReviewId').value = reviewId;
+
+    const review = currentList.find(r => String(r.id) === String(reviewId));
+    // If review not found locally, still allow modal with minimal data
+    const todayIso = new Date().toISOString().slice(0,10);
+    document.getElementById('reviewDate').value = todayIso;
+    document.getElementById('nextReviewDate').value = addMonthsISO(todayIso, 6);
+    document.getElementById('reviewNotes').value = review && review.notes ? review.notes : '';
+
+    // clear any previous customer/past containers
+    const existingCustomerInfo = document.getElementById('customerInfo');
+    if (existingCustomerInfo) existingCustomerInfo.remove();
+    const existingPastNotes = document.getElementById('pastNotes');
+    if (existingPastNotes) existingPastNotes.remove();
+
+    // try fetch customer & past reviews if we have customer_id
+    const token = getToken();
+    if (review && review.customer_id) {
+      try {
+        const customer = await apiFetch(`/api/customers/${encodeURIComponent(review.customer_id)}`, { method: 'GET' });
+        if (customer) populateCustomerInfo(customer);
+      } catch (err) {
+        console.warn('Failed to fetch customer info', err);
+      }
+
+      try {
+        const pastData = await apiFetch(`/api/reviews/customer/${encodeURIComponent(review.customer_id)}`, { method: 'GET' });
+        const pastReviews = (pastData && pastData.pastReviews) ? pastData.pastReviews : (Array.isArray(pastData) ? pastData : []);
+        populatePastNotes(pastReviews);
+      } catch (err) {
+        console.warn('Failed to fetch past reviews', err);
+      }
     }
 
-    renderList(reviews);
-  } catch (e) {
-    console.error('loadTab error', e);
-    reviewsTbody.innerHTML = '<tr><td colspan="5">Failed to load reviews.</td></tr>';
-    reviewCountEl.textContent = '0';
-  } finally {
-    applyFilterBtn.disabled = false;
-    loadingSpinner.classList.add('d-none');
+    // Show modal
+    new bootstrap.Modal(document.getElementById('completeModal')).show();
   }
-}
 
-// Initial load: display all reviews
-loadTab('upcoming', false);
-/* ========= Logout ========= */
-async function logout() {
-  // remove token + session data
-  localStorage.removeItem(TOKEN_KEY);
-  localStorage.removeItem(SESSION_KEY);
-  localStorage.removeItem('userId');
-  window.location.href = 'login.html';
-}
-logoutBtn.addEventListener('click', logout);
+  function populatePastNotes(reviews) {
+    let container = document.getElementById('pastNotes');
+    if (!container) {
+      container = document.createElement('div');
+      container.id = 'pastNotes';
+      container.className = 'mb-3 p-2 border rounded';
+      document.querySelector('#completeModal .modal-body').append(container);
+    }
 
- async function openCompleteModal(reviewId){
-  document.getElementById('completeReviewId').value = reviewId;
-  
-  // Find the review object
-  const review = currentList.find(r => r.id == reviewId);
-  if (!review) return;
+    if (!Array.isArray(reviews) || reviews.length === 0) {
+      container.innerHTML = '<p class="muted">No past notes available.</p>';
+      return;
+    }
 
-  const today = new Date().toISOString().slice(0,10);
-  document.getElementById('reviewDate').value = today;
-  document.getElementById('nextReviewDate').value = addMonthsISO(today, 6);
-  document.getElementById('reviewNotes').value = '';
-
-  const token = localStorage.getItem(TOKEN_KEY);
-
-  try {
-    // Fetch customer details
-    const customerRes = await fetch(`${API_BASE}/api/customers/${review.customer_id}`, {
-      headers: token ? { 'Authorization': 'Bearer ' + token } : {}
+    let html = '<h6>Past Notes</h6>';
+    html += '<ul class="list-group">';
+    reviews.forEach(r => {
+      const date = r.completed_date || r.scheduled_date || '-';
+      const notes = (r.notes) ? String(r.notes) : '-';
+      html += `<li class="list-group-item"><strong>${date}:</strong> ${notes}</li>`;
     });
-    const customer = await customerRes.json();
-    populateCustomerInfo(customer);
-
-    // Fetch past reviews notes
-    const pastRes = await fetch(`${API_BASE}/api/reviews/customer/${review.customer_id}`, {
-      headers: token ? { 'Authorization': 'Bearer ' + token } : {}
-    });
-    const pastData = await pastRes.json();
-    populatePastNotes(pastData.pastReviews || []);
-
-  } catch (err) {
-    console.error('Error fetching customer/past notes:', err);
+    html += '</ul>';
+    container.innerHTML = html;
   }
 
-  // Show modal
-  new bootstrap.Modal(document.getElementById('completeModal')).show();
-}
-function populatePastNotes(reviews) {
-  let container = document.getElementById('pastNotes');
-  if (!container) {
-    container = document.createElement('div');
-    container.id = 'pastNotes';
-    container.className = 'mb-3 p-2 border rounded';
-    document.querySelector('#completeModal .modal-body').append(container);
+  function populateCustomerInfo(customer) {
+    let container = document.getElementById('customerInfo');
+    if (!container) {
+      container = document.createElement('div');
+      container.id = 'customerInfo';
+      container.className = 'mb-3 p-2 border rounded';
+      document.querySelector('#completeModal .modal-body').prepend(container);
+    }
+
+    // guard against missing fields
+    const name = customer.customerName || [customer.first_name, customer.last_name].filter(Boolean).join(' ') || customer.email || '-';
+    container.innerHTML = `
+      <h6>Customer Info</h6>
+      <p><strong>Name:</strong> ${name}</p>
+      <p><strong>Email:</strong> ${customer.email || '-'}</p>
+      <p><strong>Status:</strong> ${customer.status || '-'}</p>
+      <p><strong>Phone:</strong> ${customer.phone || '-'}</p>
+      <p><strong>Address:</strong> ${customer.address_line1 || '-'}, ${customer.city || '-'}, ${customer.postal_code || '-'}, ${customer.country || '-'}</p>
+      <p><strong>Annual Income:</strong> ${customer.annual_income ?? '-'}</p>
+      <p><strong>Account Type:</strong> ${customer.account_type || '-'}</p>
+      <p><strong>Risk Score:</strong> ${customer.risk_score ?? '-'} (${customer.risk_level ?? '-'})</p>
+    `;
   }
-
-  if (reviews.length === 0) {
-    container.innerHTML = '<p class="muted">No past notes available.</p>';
-    return;
-  }
-
-  let html = '<h6>Past Notes</h6>';
-  html += '<ul class="list-group">';
-  reviews.forEach(r => {
-    html += `<li class="list-group-item">
-               <strong>${r.completed_date || r.scheduled_date}:</strong> ${r.notes || '-'}
-             </li>`;
-  });
-  html += '</ul>';
-  container.innerHTML = html;
-}
-
-function populateCustomerInfo(customer) {
-  // Create a section in your modal to show customer details (if not already present)
-  let container = document.getElementById('customerInfo');
-  if (!container) {
-    container = document.createElement('div');
-    container.id = 'customerInfo';
-    container.className = 'mb-3 p-2 border rounded';
-    document.querySelector('#completeModal .modal-body').prepend(container);
-  }
-
-  container.innerHTML = `
-    <h6>Customer Info</h6>
-    <p><strong>Name:</strong> ${customer.customerName}</p>
-    <p><strong>Email:</strong> ${customer.email}</p>
-    <p><strong>Status:</strong> ${customer.status}</p>
-    <p><strong>Phone:</strong> ${customer.phone || '-'}</p>
-    <p><strong>Address:</strong> ${customer.address_line1 || '-'}, ${customer.city || '-'}, ${customer.postal_code || '-'}, ${customer.country || '-'}</p>
-    <p><strong>Annual Income:</strong> ${customer.annual_income || '-'}</p>
-    <p><strong>Account Type:</strong> ${customer.account_type || '-'}</p>
-    <p><strong>Risk Score:</strong> ${customer.risk_score ?? '-'} (${customer.risk_level ?? '-'})</p>
-  `;
-}
-
 
   // safer addMonthsISO handling month overflow, retaining UTC behavior
   function addMonthsISO(isoDate, months) {
@@ -627,7 +645,9 @@ function populateCustomerInfo(customer) {
     const completedDate = document.getElementById('reviewDate').value;
     const nextReviewDate = document.getElementById('nextReviewDate').value;
     const notes = document.getElementById('reviewNotes').value.trim();
-    const token = localStorage.getItem(TOKEN_KEY);
+
+    // clear error
+    if (errEl) { errEl.classList.add('d-none'); errEl.textContent = ''; }
 
     // basic client validation
     if (!completedDate) {
@@ -642,60 +662,89 @@ function populateCustomerInfo(customer) {
     }
 
     try {
-      const res = await fetch(`${API_BASE}/api/reviews/${encodeURIComponent(reviewId)}/complete`, {
+      const payload = { completedDate, notes, nextReviewDate };
+      await apiFetch(`/api/reviews/${encodeURIComponent(reviewId)}/complete`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { 'Authorization': 'Bearer ' + token } : {})
-        },
-        body: JSON.stringify({ completedDate, notes, nextReviewDate })
+        body: JSON.stringify(payload)
       });
-      if (!res.ok) {
-        const txt = await res.text();
-        throw new Error(txt || 'Failed to complete');
-      }
       // success: close modal & reload current view (respect filters if set)
-      bootstrap.Modal.getInstance(document.getElementById('completeModal')).hide();
-      loadTab(currentTab, Boolean(filterFrom.value || filterTo.value));
+      const modalEl = document.getElementById('completeModal');
+      const modalInstance = bootstrap.Modal.getInstance(modalEl);
+      modalInstance && modalInstance.hide();
+      await loadTab(currentTab, Boolean(filterFrom.value || filterTo.value));
     } catch (e) {
       console.error('confirmComplete error', e);
-      if (errEl) { errEl.textContent = 'Failed to complete review.'; errEl.classList.remove('d-none'); }
-      else alert('Failed to complete review');
+      if (errEl) { errEl.textContent = e.message || 'Failed to complete review.'; errEl.classList.remove('d-none'); }
     } finally {
       btn.disabled = false;
     }
   }
 
   async function runScheduler(){
-    const token = localStorage.getItem(TOKEN_KEY);
-    const btn = document.getElementById('btnScheduler');
+    const btn = btnScheduler;
     btn.disabled = true;
     try {
-      const res = await fetch(`${API_BASE}/api/reviews/admin/run-review-scheduler`, {
+      const json = await apiFetch('/api/reviews/admin/run-review-scheduler', {
         method: 'POST',
-        headers: token ? { 'Authorization': 'Bearer ' + token } : {}
       });
-      if (!res.ok) {
-        const txt = await res.text();
-        throw new Error(txt || 'Scheduler failed');
-      }
-      const json = await res.json();
-      const createdCount = Array.isArray(json.created) ? json.created.length : (json.created ? 1 : 0);
+      const createdCount = Array.isArray(json && json.created) ? json.created.length : (json && json.created ? 1 : 0);
       alert('Scheduler created ' + createdCount + ' reviews');
       // reload current view
-      loadTab(currentTab, Boolean(filterFrom.value || filterTo.value));
+      await loadTab(currentTab, Boolean(filterFrom.value || filterTo.value));
     } catch (err) {
       console.error('runScheduler', err);
-      alert('Scheduler run failed');
+      alert('Scheduler run failed: ' + (err.message || 'unknown error'));
     } finally {
       btn.disabled = false;
     }
   }
 
-  // initial load: set default preset and load list
-  onPresetChange();
-  loadTab('upcoming', true);
-})();
+  // Hook up UI events
+  btnUpcoming && btnUpcoming.addEventListener('click', () => loadTab('upcoming', true));
+  btnOverdue && btnOverdue.addEventListener('click', () => loadTab('overdue', true));
+  applyFilterBtn && applyFilterBtn.addEventListener('click', ()=>loadTab(currentTab, true));
+  presetDays && presetDays.addEventListener('change', onPresetChange);
+  btnScheduler && btnScheduler.addEventListener('click', runScheduler);
+  confirmCompleteBtn && confirmCompleteBtn.addEventListener('click', confirmComplete);
+  // --- backfill once per session when the page loads ---
+  async function runBackfillOncePerSession() {
+    try {
+      // don't run more than once per browser session
+      if (sessionStorage.getItem('backfillDone')) return;
+
+      // show spinner while backfill runs (optional)
+      if (loadingSpinner) loadingSpinner.classList.remove('d-none');
+
+      // call your backfill endpoint — adjust path if your route is mounted differently
+      // NOTE: apiFetch expects a path relative to API_BASE (it will call `${API_BASE}${endpoint}`)
+      const json = await apiFetch('/api/reviews/backfill', { method: 'POST' });
+
+      // mark as done for this browser session
+      sessionStorage.setItem('backfillDone', '1');
+
+      // user feedback (replace with toast if you prefer)
+      if (json && json.message) {
+        console.info('Backfill:', json.message);
+      } else {
+        console.info('Backfill completed');
+      }
+    } catch (err) {
+      // do not block the UI if backfill fails — log and optionally show a non-blocking message
+      console.warn('Backfill failed:', err);
+      // if you want the user to know: uncomment the next line
+      // alert('Backfill failed: ' + (err && err.message ? err.message : 'unknown error'));
+    } finally {
+      if (loadingSpinner) loadingSpinner.classList.add('d-none');
+    }
+  }
+
+
+  runBackfillOncePerSession().finally(() => {
+    onPresetChange();
+    loadTab('upcoming', true);
+  });
+
+});
 </script>
 </body>
 </html>

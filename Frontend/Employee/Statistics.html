@@ -420,13 +420,21 @@ const payload = JSON.parse(atob(token.split('.')[1]));
   const toInput = document.getElementById('toDate');
   const applyBtn = document.getElementById('applyRange');
 
-  (function setDefaults(){
-    const now = new Date();
-    const to = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const from = new Date(to.getFullYear(), to.getMonth() - 5, 1); // approx last 6 months
-    fromInput.valueAsDate = from;
-    toInput.valueAsDate = to;
-  })();
+ function formatDate(date) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
+(function setDefaults(){
+  const now = new Date();
+  const from = new Date(now.getFullYear(), now.getMonth() - 5, 1);
+  fromInput.value = formatDate(from);
+  toInput.value = formatDate(now); // today
+})();
+
+
 
   applyBtn.addEventListener('click', () => {
     const from = fromInput.value;
