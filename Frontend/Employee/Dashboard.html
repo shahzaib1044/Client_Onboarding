@@ -664,7 +664,7 @@ function updateDashboardStats() {
   const total = currentResults.length;
 
   const pending = currentResults.filter(c => 
-    (c.status || '').toUpperCase() === 'PENDING'
+    (c.status || '').toUpperCase() === 'DRAFT'
   ).length;
 
   const highRisk = currentResults.filter(c => {
