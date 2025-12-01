@@ -1,0 +1,593 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Customer Documents</title>
+
+  <!-- Bootstrap 5 CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <style>
+    /* Small custom styles */
+    .error { color: #dc3545; font-size: 0.9em; }
+    .valid { color: #198754; font-size: 0.9em; }
+    .currency-input { text-align: right; }
+    .spinner-border-sm { width: 1rem; height: 1rem; border-width: .15rem; }
+
+    button:disabled { background: #9fc3ff; cursor: not-allowed; }
+
+    .footer-text { text-align: center; font-size: 14px; color: #666; margin-top: 15px; }
+    .footer-text a { color: #007bff; text-decoration: none; font-weight: 600; }
+    .footer-text a:hover { text-decoration: underline; }
+
+    .icon { width: 60px; height: 60px; background: #007bff; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; font-size: 28px; }
+
+    /* Upload area */
+    .upload-drop {
+      border: 2px dashed #ced4da;
+      border-radius: 8px;
+      padding: 24px;
+      text-align: center;
+      background: #fff;
+      transition: background .15s, border-color .15s;
+    }
+    .upload-drop.dragover {
+      background: #eef7ff;
+      border-color: #7abaff;
+    }
+    .file-card { display:flex; align-items:center; gap:12px; padding:8px 12px; border-radius:6px; border:1px solid #e9ecef; background:#fff; margin-bottom:8px; }
+    .file-thumb { width:56px; height:56px; border-radius:6px; display:flex; align-items:center; justify-content:center; overflow:hidden; background:#f8f9fa; font-weight:600; color:#6c757d; }
+    .file-meta { flex:1; min-width:0; }
+    .file-actions { display:flex; gap:8px; align-items:center; }
+    .progress { height: 8px; border-radius: 4px; overflow: hidden; background: #e9ecef; }
+    .pdf-icon { font-size: 24px; color:#dc3545; }
+    .muted-small { font-size: 0.85rem; color: #6c757d; }
+
+    /* Documents table */
+    .table-wrap { max-height: 320px; overflow:auto; }
+  </style>
+</head>
+<body class="bg-light">
+  <!-- ================= HEADER / NAVBAR ================= -->
+<nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm px-4">
+  <div class="container-fluid">
+    <a class="navbar-brand d-flex align-items-center" href="#">
+      <span class="branding-icon">📄</span>
+      <div>
+        <h5 class="m-0 fw-bold">Client Onboarding</h5>
+        <small class="text-muted">Customer Portal</small>
+      </div>
+    </a>
+
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="mainNavbar">
+      <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+        <li class="nav-item"><a class="nav-link " href="Customer_Dashboard.html">Dashboard</a></li>
+        <li class="nav-item"><a class="nav-link " href="Profile.html">Profile</a></li>
+        <li class="nav-item"><a class="nav-link active" href="Documents.html">Documents</a></li>
+        <li class="nav-item d-lg-none"><a class="nav-link text-danger" href="#" id="logoutBtnMobile">Logout</a></li>
+      </ul>
+
+      <div class="d-none d-lg-block text-end me-3">
+        <p class="m-0 fw-semibold" id="userEmail">user@example.com</p>
+        <small class="text-muted">Customer Account</small>
+      </div>
+    <!-- Logout button (desktop only) -->
+      <button id="logoutBtn" class="btn btn-outline-danger d-none d-lg-block">
+        Logout
+      </button>
+     
+    </div>
+  </div>
+</nav>
+
+<nav aria-label="breadcrumb" class="bg-white px-4 py-2 shadow-sm">
+  <ol class="breadcrumb m-0">
+    <li class="breadcrumb-item active">Documents</a></li>
+  
+    <li class="breadcrumb-item"><a href="Customer_Dashboard.html">Dashboard</a></li>
+    <li class="breadcrumb-item"><a href="Profile.html">Profile</a></li>
+  </ol>
+</nav>
+
+<!-- ================== MAIN CONTENT ================== -->
+<div class="container my-4">
+  <div class="row g-4">
+    <div class="col-lg-7">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h5 class="card-title mb-3">Upload Identity Documents</h5>
+
+          <!-- Upload area -->
+          <div id="uploadArea" class="upload-drop" tabindex="0">
+            <div class="mb-3">
+              <strong>Drag & drop files here</strong>
+              <div class="muted-small">or <label class="btn btn-sm btn-outline-primary mb-0" style="cursor:pointer"><input id="fileInput" type="file" accept=".pdf,.jpg,.jpeg" multiple style="display:none">Choose files</label></div>
+              <div class="muted-small mt-2">Accepted: <code>.pdf, .jpg, .jpeg</code> — Max size: <strong>5 MB</strong> per file — Max <strong>5</strong> documents per customer</div>
+            </div>
+
+            <div class="row g-2 align-items-center">
+              <div class="col-6">
+                <select id="documentType" class="form-select">
+                  <option value="id_card">ID Card</option>
+                  <option value="passport">Passport</option>
+                  <option value="driver_license">Driver License</option>
+                  <option value="proof_of_address">Proof of Address</option>
+                  <option value="other">Other</option>
+                </select>
+                <div class="muted-small mt-1">Select document type (used in filename)</div>
+              </div>
+              <div class="col-6 text-end">
+                <button id="uploadBtn" class="btn btn-primary" disabled>Upload Selected <span id="uploadSpinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span></button>
+              </div>
+            </div>
+
+            <div class="mt-3" id="selectedFilesList"></div>
+            <div class="mt-2" id="uploadNotice" role="status" aria-live="polite"></div>
+          </div>
+
+          <hr class="my-4">
+
+          <div>
+            <h6 class="mb-2">Upload Tips & Server Behavior</h6>
+            <ul class="muted-small mb-0">
+              
+              <li>Server will return HTTP <strong>413</strong> if file too large, HTTP <strong>415</strong> if unsupported format. These are displayed below when returned.</li>
+              <li>Virus scanning is recommended (optional/future).</li>
+            </ul>
+            <div id="serverMessage" class="mt-2"></div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-5">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h5 class="card-title mb-3">Your Documents</h5>
+          <div class="table-wrap">
+            <table class="table table-sm align-middle mb-0" id="docsTable">
+              <thead class="table-light">
+                <tr>
+                  <th>Preview</th>
+                  <th>File</th>
+                  <th>Size</th>
+                  <th>Uploaded</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="docsTbody">
+                <tr><td colspan="5" class="text-center muted-small">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="muted-small mt-3">Only authorized users can access documents.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- Bootstrap JS & Popper (duplicate safe) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+/* ---------- CONFIG & helper functions (reuse variables from your app) ---------- */
+const BASE_API_URL = "";
+const TOKEN_KEY = window.TOKEN_KEY || 'token';
+
+// IMPORTANT: match multer limits in server: 10MB
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+const MAX_FILES_PER_CUSTOMER = 5;
+const ACCEPTED_EXTENSIONS = ['pdf','jpg','jpeg','png'];
+const ACCEPTED_MIME = ['application/pdf','image/png','image/jpeg'];
+
+function getToken() { return localStorage.getItem(TOKEN_KEY); }
+function authHeaders() {
+  const token = getToken();
+  if (!token) return {};
+  return { 'Authorization': `Bearer ${token}` };
+}
+const logoutBtn = document.getElementById('logoutBtn');
+async function logout() {
+  console.log('Logging out...');
+  localStorage.removeItem('TOKEN_KEY');  // match exact keys
+  localStorage.removeItem('SESSION_KEY');
+  localStorage.removeItem('userId');
+
+  // optional: call backend logout if needed
+  // await fetch(`${BASE_API_URL}/api/auth/logout`, { method: 'POST', credentials: 'include' });
+
+  window.location.href = 'login.html'; // correct path
+}
+logoutBtn.addEventListener('click', logout);
+
+const userEmailEl = document.getElementById('userEmail');
+const token = getToken();
+const payload = JSON.parse(atob(token.split('.')[1]));
+    userEmailEl.textContent = payload.email
+    userEmailEl.textContent =  payload.email|| (localStorage.getItem('userId') || "user@example.com");
+/* ---------- UI refs ---------- */
+const uploadArea = document.getElementById('uploadArea');
+const fileInput = document.getElementById('fileInput');
+const selectedFilesList = document.getElementById('selectedFilesList');
+const uploadBtn = document.getElementById('uploadBtn');
+const uploadSpinner = document.getElementById('uploadSpinner');
+const documentTypeSelect = document.getElementById('documentType');
+const serverMessage = document.getElementById('serverMessage');
+const docsTbody = document.getElementById('docsTbody');
+let selectedFiles = []; // File objects waiting to upload
+let currentCustomerId = null;
+
+/* ---------- Determine customer id (reuses your /api/customers/me) ---------- */
+async function ensureCustomerId() {
+  if (currentCustomerId) return currentCustomerId;
+  try {
+    const res = await fetch(`${BASE_API_URL}/api/customers/me`, {
+      headers: { ...authHeaders(), 'Accept': 'application/json' }
+    });
+    if (!res.ok) {
+      console.warn('Could not fetch /me', res.status);
+      return null;
+    }
+    const data = await res.json();
+    currentCustomerId = data?.id || data?.customerId || null;
+    return currentCustomerId;
+  } catch (err) {
+    console.error('ensureCustomerId error', err);
+    return null;
+  }
+}
+
+/* ---------- Drag & drop handling ---------- */
+['dragenter','dragover'].forEach(evt => {
+  uploadArea.addEventListener(evt, (e) => {
+    e.preventDefault(); e.stopPropagation();
+    uploadArea.classList.add('dragover');
+  });
+});
+['dragleave','drop'].forEach(evt => {
+  uploadArea.addEventListener(evt, (e) => {
+    e.preventDefault(); e.stopPropagation();
+    uploadArea.classList.remove('dragover');
+  });
+});
+uploadArea.addEventListener('drop', (e) => {
+  const dt = e.dataTransfer;
+  if (dt && dt.files) handleFiles(Array.from(dt.files));
+});
+
+/* ---------- File input change ---------- */
+fileInput.addEventListener('change', (e) => {
+  const files = Array.from(e.target.files || []);
+  handleFiles(files);
+  fileInput.value = ''; // reset
+});
+
+/* ---------- Accept files and validate ---------- */
+function handleFiles(files) {
+  serverMessage.innerHTML = '';
+  if (!files || files.length === 0) return;
+
+  const newFiles = [];
+  for (const f of files) {
+    const ext = (f.name.split('.').pop() || '').toLowerCase();
+    const mimetype = f.type;
+    // validate extension or mime
+    if (!ACCEPTED_EXTENSIONS.includes(ext) || !ACCEPTED_MIME.includes(mimetype)) {
+      serverMessage.innerHTML += `<div class="error">Unsupported format: ${escapeHtml(f.name)} — only .pdf, .jpg, .jpeg, .png allowed.</div>`;
+      continue;
+    }
+    if (f.size > MAX_FILE_SIZE) {
+      serverMessage.innerHTML += `<div class="error">File too large: ${escapeHtml(f.name)} — max ${formatBytes(MAX_FILE_SIZE)}.</div>`;
+      continue;
+    }
+    newFiles.push(f);
+  }
+
+  addSelectedFiles(newFiles);
+}
+
+/* ---------- Manage selectedFiles array and UI ---------- */
+async function addSelectedFiles(files) {
+  const customerId = await ensureCustomerId();
+  const existingCount = await fetchExistingDocumentsCount(customerId);
+  const allowed = Math.max(0, MAX_FILES_PER_CUSTOMER - existingCount - selectedFiles.length);
+  if (files.length > allowed) {
+    serverMessage.innerHTML += `<div class="error">You can only upload ${MAX_FILES_PER_CUSTOMER} documents in total. You may upload ${allowed} more.</div>`;
+    files = files.slice(0, allowed);
+  }
+  selectedFiles = selectedFiles.concat(files);
+  renderSelectedFiles();
+  uploadBtn.disabled = selectedFiles.length === 0;
+}
+
+/* ---------- Render selected files list ---------- */
+function renderSelectedFiles() {
+  selectedFilesList.innerHTML = '';
+  if (selectedFiles.length === 0) {
+    selectedFilesList.innerHTML = `<div class="muted-small">No files selected</div>`;
+    uploadBtn.disabled = true;
+    return;
+  }
+  selectedFiles.forEach((f, idx) => {
+    const ext = (f.name.split('.').pop() || '').toLowerCase();
+    const isImage = ext === 'jpg' || ext === 'jpeg' || ext === 'png';
+    const readerDiv = document.createElement('div');
+    readerDiv.className = 'file-card';
+
+    const thumb = document.createElement('div');
+    thumb.className = 'file-thumb';
+    if (isImage) {
+      const img = document.createElement('img'); img.style.width='100%'; img.style.height='100%'; img.style.objectFit='cover';
+      const fr = new FileReader();
+      fr.onload = () => img.src = fr.result;
+      fr.readAsDataURL(f);
+      thumb.appendChild(img);
+    } else {
+      thumb.innerHTML = `<div class="pdf-icon">PDF</div>`;
+    }
+
+    const meta = document.createElement('div');
+    meta.className = 'file-meta';
+    meta.innerHTML = `<div class="fw-semibold text-truncate">${escapeHtml(f.name)}</div>
+                      <div class="muted-small">${formatBytes(f.size)} · ${ext.toUpperCase()}</div>`;
+
+    const actions = document.createElement('div');
+    actions.className = 'file-actions';
+    const removeBtn = document.createElement('button');
+    removeBtn.className = 'btn btn-sm btn-outline-danger';
+    removeBtn.innerText = 'Remove';
+    removeBtn.addEventListener('click', () => {
+      selectedFiles.splice(idx,1);
+      renderSelectedFiles();
+    });
+
+    actions.appendChild(removeBtn);
+    readerDiv.appendChild(thumb);
+    readerDiv.appendChild(meta);
+    readerDiv.appendChild(actions);
+    selectedFilesList.appendChild(readerDiv);
+  });
+}
+
+/* ---------- Upload logic — matches server multer upload.array('files') ---------- */
+uploadBtn.addEventListener('click', async () => {
+  uploadBtn.disabled = true;
+  uploadSpinner.classList.remove('d-none');
+  serverMessage.innerHTML = '';
+  const customerId = await ensureCustomerId();
+  if (!customerId) {
+    serverMessage.innerHTML = `<div class="error">Unable to determine customer id. Please re-login.</div>`;
+    uploadBtn.disabled = false;
+    uploadSpinner.classList.add('d-none');
+    return;
+  }
+
+  const docType = documentTypeSelect.value || 'other';
+  try {
+    // upload each file sequentially (server accepts multiple; we still do sequential for progress clarity)
+    for (const f of [...selectedFiles]) {
+      await uploadSingleFile(customerId, f, docType);
+      // remove from UI queue after success
+      selectedFiles = selectedFiles.filter(x => x !== f);
+      renderSelectedFiles();
+      await loadDocuments(customerId);
+    }
+    serverMessage.innerHTML += `<div class="valid">All files uploaded successfully.</div>`;
+  } catch (err) {
+    console.error('Upload error', err);
+    serverMessage.innerHTML += `<div class="error">Upload failed: ${escapeHtml(err.message || String(err))}</div>`;
+  } finally {
+    uploadBtn.disabled = selectedFiles.length === 0;
+    uploadSpinner.classList.add('d-none');
+  }
+});
+
+function uploadSingleFile(customerId, file, documentType) {
+  return new Promise((resolve, reject) => {
+    // NOTE: do NOT rename on client. Send original file name; server sanitizes and stores.
+    const url = `${BASE_API_URL}/api/customers/${customerId}/documents`;
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', url, true);
+    const headers = authHeaders();
+    if (headers['Authorization']) xhr.setRequestHeader('Authorization', headers['Authorization']);
+
+    xhr.upload.onprogress = (e) => {
+      showUploadingProgress(file.name, e.loaded, e.total);
+    };
+
+    xhr.onreadystatechange = function() {
+      if (xhr.readyState !== 4) return;
+      removeUploadingProgress(file.name);
+
+      if (xhr.status >= 200 && xhr.status < 300) {
+        resolve();
+      } else if (xhr.status === 413) {
+        reject(new Error(`File too large (server returned 413): ${file.name}`));
+      } else if (xhr.status === 415) {
+        reject(new Error(`Unsupported media type (server returned 415): ${file.name}`));
+      } else {
+        let body = null;
+        try { body = JSON.parse(xhr.responseText); } catch(e) {}
+        const msg = body?.message || `Upload failed: ${xhr.status} ${xhr.statusText}`;
+        reject(new Error(msg));
+      }
+    };
+
+    const form = new FormData();
+    // IMPORTANT: server's multer expects field name 'files' (upload.array('files'))
+    // For single-file upload we can append one with name 'files'. For multi-file, append multiple entries with same name.
+    form.append('files', file, file.name);
+    // also add documentType so server can use it if desired
+    form.append('documentType', documentType);
+
+    xhr.send(form);
+    addUploadingProgress(file.name);
+  });
+}
+
+/* ---------- Small uploading progress UI helpers (same as before) ---------- */
+function addUploadingProgress(name) {
+  const id = 'uploading-' + btoa(name).replace(/=/g,'');
+  if (document.getElementById(id)) return;
+  const node = document.createElement('div');
+  node.id = id;
+  node.className = 'mt-2';
+  node.innerHTML = `
+    <div class="mb-1"><small>Uploading: ${escapeHtml(name)}</small></div>
+    <div class="progress"><div class="progress-bar" role="progressbar" style="width:0%"></div></div>
+  `;
+  selectedFilesList.appendChild(node);
+}
+function showUploadingProgress(name, loaded, total) {
+  const id = 'uploading-' + btoa(name).replace(/=/g,'');
+  const el = document.getElementById(id);
+  if (!el) return;
+  const pct = total ? Math.round((loaded/total)*100) : 0;
+  const bar = el.querySelector('.progress-bar');
+  if (bar) bar.style.width = pct + '%';
+}
+function removeUploadingProgress(name) {
+  const id = 'uploading-' + btoa(name).replace(/=/g,'');
+  const el = document.getElementById(id);
+  if (el) el.remove();
+}
+
+/* ---------- Existing documents: load & render (server inserts rows described in your route) ---------- */
+async function fetchExistingDocuments(customerId) {
+  if (!customerId) return [];
+  try {
+    const res = await fetch(`${BASE_API_URL}/api/customers/${customerId}/documents`, {
+      headers: { ...authHeaders(), 'Accept':'application/json' }
+    });
+    if (!res.ok) {
+      console.warn('GET documents failed', res.status);
+      return [];
+    }
+    const data = await res.json();
+    // your server returns inserted rows with columns like: id, customer_id, file_name, file_path, file_size, mime_type, uploaded_at
+    return Array.isArray(data) ? data : (data.documents || []);
+  } catch (err) {
+    console.error('fetchExistingDocuments error', err);
+    return [];
+  }
+}
+async function fetchExistingDocumentsCount(customerId) {
+  const docs = await fetchExistingDocuments(customerId);
+  return docs.length;
+}
+
+async function loadDocuments(customerId) {
+  docsTbody.innerHTML = `<tr><td colspan="5" class="text-center muted-small">Loading...</td></tr>`;
+  const docs = await fetchExistingDocuments(customerId);
+  if (!docs || docs.length === 0) {
+    docsTbody.innerHTML = `<tr><td colspan="5" class="text-center muted-small">No documents uploaded yet.</td></tr>`;
+    return;
+  }
+  docsTbody.innerHTML = '';
+  docs.forEach(doc => {
+    const tr = document.createElement('tr');
+
+    const ext = (doc.file_name || '').split('.').pop() || '';
+    const isImage = ['jpg','jpeg','png'].includes(ext.toLowerCase());
+    const previewTd = document.createElement('td');
+    if (isImage) {
+      const img = document.createElement('img');
+      // Prefer a file_url if server provides one. Otherwise you may need to generate public Supabase URL server-side.
+      img.src = doc.file_url || `${BASE_API_URL}/${doc.file_path}`; 
+      img.style.width='56px'; img.style.height='56px'; img.style.objectFit='cover'; img.className='rounded';
+      previewTd.appendChild(img);
+    } else {
+      previewTd.innerHTML = `<div class="pdf-icon">PDF</div>`;
+    }
+
+    const fileTd = document.createElement('td');
+    fileTd.innerHTML = `<div class="fw-semibold">${escapeHtml(doc.file_name || '')}</div><div class="muted-small">${escapeHtml(doc.mime_type || '')}</div>`;
+
+    const sizeTd = document.createElement('td'); sizeTd.innerText = formatBytes(doc.file_size || 0);
+
+    const uploadedTd = document.createElement('td'); uploadedTd.innerText = new Date(doc.uploaded_at || doc.created_at || Date.now()).toLocaleString();
+
+    const actionsTd = document.createElement('td');
+    const viewBtn = document.createElement('a');
+    viewBtn.className = 'btn btn-sm btn-outline-primary me-2';
+    viewBtn.href = doc.file_url || `${BASE_API_URL}/${doc.file_path}`;
+    viewBtn.target = '_blank';
+    viewBtn.innerText = 'View';
+    const delBtn = document.createElement('button');
+    delBtn.className = 'btn btn-sm btn-outline-danger';
+    delBtn.innerText = 'Delete';
+    delBtn.addEventListener('click', async () => {
+      if (!confirm('Delete this document?')) return;
+      try {
+        const res = await fetch(`${BASE_API_URL}/api/customers/${customerId}/documents/${encodeURIComponent(doc.id || doc.document_id || doc._id)}`, {
+          method: 'DELETE',
+          headers: { ...authHeaders() }
+        });
+        if (!res.ok) {
+          const body = await res.json().catch(()=>null);
+          alert(body?.message || `Delete failed: ${res.status}`);
+          return;
+        }
+        await loadDocuments(customerId);
+      } catch (err) {
+        console.error('Delete error', err);
+        alert('Server error when deleting.');
+      }
+    });
+
+    actionsTd.appendChild(viewBtn);
+    actionsTd.appendChild(delBtn);
+
+    tr.appendChild(previewTd);
+    tr.appendChild(fileTd);
+    tr.appendChild(sizeTd);
+    tr.appendChild(uploadedTd);
+    tr.appendChild(actionsTd);
+
+    docsTbody.appendChild(tr);
+  });
+}
+
+/* ---------- Utilities ---------- */
+function formatBytes(bytes, decimals = 1) {
+  if (bytes === 0) return '0 B';
+  const k = 1024, dm = decimals < 0 ? 0 : decimals;
+  const sizes = ['B','KB','MB','GB','TB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+}
+function escapeHtml(s) {
+  if (!s) return '';
+  return s.replace(/[&<>"']/g, (m) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+/* ---------- Init: determine customer & load docs ---------- */
+document.addEventListener('DOMContentLoaded', async () => {
+  const cid = await ensureCustomerId();
+  if (cid) {
+    await loadDocuments(cid);
+  } else {
+    docsTbody.innerHTML = `<tr><td colspan="5" class="text-center text-danger">Unable to determine customer id. Please re-login.</td></tr>`;
+  }
+});
+
+/* ---------- Accessibility: Enter opens file selector ---------- */
+uploadArea.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' || e.key === ' ') {
+    fileInput.click();
+    e.preventDefault();
+  }
+});
+</script>
+
+</body>
+</html>

@@ -336,7 +336,7 @@
         </li>
 
         <li class="nav-item">
-          <a class="nav-link" href="#">Documents</a>
+          <a class="nav-link" href="Documents.html">Documents</a>
         </li>
 
         <li class="nav-item d-lg-none">
@@ -376,7 +376,7 @@
 
     <!-- Documents -->
     <li class="breadcrumb-item">
-      <a href="documents.html">Documents</a>
+      <a href="Documents.html">Documents</a>
     </li>
 
   </ol>
@@ -775,12 +775,37 @@ const payload = JSON.parse(atob(token.split('.')[1]));
         downloadBtn.className = 'btn-outline';
         downloadBtn.textContent = 'Download';
         // include BASE_API_URL and auth header is handled by server for download; using anchor to open
-        downloadBtn.onclick = () => {
-          // open in new tab using absolute URL (server should check auth via cookie/header)
-          // We cannot add header to window.open; ensure the server accepts token via cookie or provide a signed download link
-          // For now, open the endpoint — the browser will send cookie if you use cookie-based auth
-          window.open(`${BASE_API_URL}/api/customers/${customerId}/documents/${doc.id}`, '_blank');
-        };
+      downloadBtn.onclick = async () => {
+  try {
+    const token = localStorage.getItem('token'); // or however you store it
+    const res = await fetch(`${BASE_API_URL}/api/customers/${customerId}/documents/${doc.id}/download`, {
+      method: 'GET',
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+
+    if (!res.ok) {
+      const body = await res.json().catch(()=>null);
+      throw new Error(body?.message || `Download failed: ${res.status}`);
+    }
+
+    const blob = await res.blob();
+    const filename = doc.file_name || 'document';
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.target = '_blank';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  } catch (err) {
+    console.error(err);
+    alert('Download failed: ' + err.message);
+  }
+};
+
+
 
         docDiv.appendChild(infoDiv);
         docDiv.appendChild(downloadBtn);

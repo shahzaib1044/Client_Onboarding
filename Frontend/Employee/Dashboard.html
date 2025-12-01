@@ -497,17 +497,39 @@ logoutBtn.addEventListener('click', logout);
 
   let currentCustomerId = null;
 
-  async function openCustomerDetail(id){
-    currentCustomerId = id;
-    document.getElementById("customerDetailBody").innerHTML = `<div class="text-center py-4 text-muted">Loading...</div>`;
-    try{
-      const c = await apiFetch(`/api/customers/${id}`);
-      renderCustomerDetail(c);
-    }catch(e){
-      document.getElementById("customerDetailBody").innerHTML = `<div class="text-danger text-center py-4">${e.message}</div>`;
+async function openCustomerDetail(id) {
+  currentCustomerId = id;
+  const bodyEl = document.getElementById("customerDetailBody");
+  bodyEl.innerHTML = `<div class="text-center py-4 text-muted">Loading...</div>`;
+
+  try {
+    // 1. Fetch customer info
+    const customer = await apiFetch(`/api/customers/${id}`);
+
+    // 2. Fetch documents separately from your documents API
+    let documents = [];
+    try {
+      documents = await apiFetch(`/api/customers/${id}/documents`);
+    } catch (docErr) {
+      console.warn("Failed to fetch documents", docErr);
+      // optionally leave documents empty
     }
-    new bootstrap.Modal(document.getElementById("customerDetailModal")).show();
+
+    // 3. Merge documents into customer object
+    customer.documents = documents.map(d => ({
+      type: d.file_name,  // you can map to type if you have a type field
+      url: d.file_url     // signed URL returned by backend
+    }));
+
+    // 4. Render customer detail
+    renderCustomerDetail(customer);
+
+  } catch (e) {
+    bodyEl.innerHTML = `<div class="text-danger text-center py-4">${e.message}</div>`;
   }
+
+  new bootstrap.Modal(document.getElementById("customerDetailModal")).show();
+}
 
   function renderCustomerDetail(c){
     const body = document.getElementById("customerDetailBody");
