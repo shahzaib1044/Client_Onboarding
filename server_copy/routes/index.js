@@ -9,7 +9,10 @@ const auditRoutes = require('./audit');
 function registerRoutes(app) {
   app.use('/api/auth', authRoutes);
   app.use('/api/customers', customerRoutes);
-  app.use('/api/documents', documentRoutes); // general document endpoints
+  // app.use('/api/documents', documentRoutes); // general document endpoints
+  // after — mount at /api so routes like /api/customers/:id/documents match
+  app.use('/api', documentRoutes);
+
   app.use('/api/reviews', reviewRoutes);
   app.use('/api/dashboard', dashboardRoutes);
   app.use('/api/audit-logs', auditRoutes);
